@@ -1,0 +1,60 @@
+class Solution {
+    public String solution(String video_len, String pos, String op_start, String op_end, String[] commands) {
+
+        int video_len_n = toSec(video_len);
+        int pos_n = toSec(pos);
+        int op_start_n = toSec(op_start);
+        int op_end_n = toSec(op_end);
+
+        // 시작 전 체크
+        if(op_start_n <= pos_n && pos_n <= op_end_n){
+            pos_n = op_end_n;
+        }
+
+        for(String command : commands){
+            if(command.equals("prev")){
+                pos_n -= 10;
+
+                if(pos_n < 0){
+                    pos_n = 0;
+                }
+            }
+
+            if(command.equals("next")){
+                pos_n += 10;
+
+                if(pos_n > video_len_n){
+                    pos_n = video_len_n;
+                }
+            }
+
+            // 끝나고 체크 
+            if(op_start_n <= pos_n && pos_n <= op_end_n){
+                pos_n = op_end_n;
+            }
+        }
+
+        return toMin(pos_n);
+    }
+
+    private int toSec(String time){
+        String min = time.substring(0, 2);
+        String sec = time.substring(3, 5);
+        return Integer.parseInt(min) * 60 + Integer.parseInt(sec);
+    }
+
+    private String toMin(int time){
+        String min = String.valueOf(time / 60);
+        if(min.length() == 1){
+            min = "0" + min;
+        }
+
+        String sec = String.valueOf(time - (time / 60) * 60);
+        if(sec.length() == 1){
+            sec = "0" + sec;
+        }
+
+        return min + ":" + sec;
+    }
+}
+

@@ -1,0 +1,66 @@
+class Solution {
+    public int[] solution(String[] park, String[] routes) {       
+        int rowCount = park.length;
+        int colCount = park[0].length();
+        int row = 0, col = 0;
+
+        // 시작 위치 찾기
+        for (int i = 0; i < rowCount; i++) {
+            int index = park[i].indexOf("S");
+            if (index != -1) {
+                row = i;
+                col = index;
+                break;
+            }
+        }
+
+        // 방향별 이동 좌표 변화량 (N, S, W, E 순)
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
+        char[] directions = {'N', 'S', 'W', 'E'};
+
+        for (String route : routes) {
+            String[] parts = route.split(" ");
+            char dir = parts[0].charAt(0);
+            int len = Integer.parseInt(parts[1]);
+
+            int dirIdx = 0;
+            for (int i = 0; i < 4; i++) {
+                if (directions[i] == dir) {
+                    dirIdx = i;
+                    break;
+                }
+            }
+
+            int newRow = row + dx[dirIdx] * len;
+            int newCol = col + dy[dirIdx] * len;
+
+            if (isValidMove(row, col, newRow, newCol, dx[dirIdx], dy[dirIdx], park)) {
+                row = newRow;
+                col = newCol;
+            }
+        }
+
+        return new int[]{row, col};
+    }
+
+    private boolean isValidMove(int row, int col, int newRow, int newCol, int dx, int dy, String[] park) {
+        int rowCount = park.length;
+        int colCount = park[0].length();
+
+        if (newRow < 0 || newRow >= rowCount || newCol < 0 || newCol >= colCount) {
+            return false; // 공원을 벗어나면 무시
+        }
+
+        for (int i = 1; i <= Math.abs(newRow - row + newCol - col); i++) {
+            int checkRow = row + i * dx;
+            int checkCol = col + i * dy;
+            if (park[checkRow].charAt(checkCol) == 'X') {
+                return false; // 장애물 만나면 무시
+            }
+        }
+
+        return true;
+    }
+}
+

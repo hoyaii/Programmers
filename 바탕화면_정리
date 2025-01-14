@@ -1,0 +1,19 @@
+class Solution {
+    public int[] solution(String[] wallpaper) {
+        int x_min = 51; int x_max = 0;
+        int y_min = 51; int y_max = 0;
+        
+        for(int i = 0; i < wallpaper.length; i++){
+            for(int j = 0; j < wallpaper[0].length(); j++){
+                if(wallpaper[i].charAt(j) == '#'){
+                    x_min = Math.min(i, x_min);
+                    x_max = Math.max(i, x_max);
+                    y_min = Math.min(j, y_min);
+                    y_max = Math.max(j, y_max);
+                }       
+            }
+        }
+        
+        return new int[]{x_min, y_min, x_max+1, y_max+1};
+    }
+}

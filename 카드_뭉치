@@ -1,0 +1,28 @@
+class Solution {
+    public String solution(String[] cards1, String[] cards2, String[] goal) {
+        if(combi(0, 0, 0, cards1, cards2, goal)){
+            return "Yes";
+        } else{
+            return "No";
+        }
+    }
+    
+    private boolean combi(int idx, int p1, int p2, String[] cards1, String[] cards2, String[] goal){
+        if(idx == goal.length){
+            return true;
+        }
+        
+        if(p1 < cards1.length && goal[idx].equals(cards1[p1])){
+            idx++;
+            p1++;
+            return combi(idx, p1, p2, cards1, cards2, goal);
+        } 
+            
+        if(p2 < cards2.length && goal[idx].equals(cards2[p2])){
+            idx++;
+            p2++;
+            return combi(idx, p1, p2, cards1, cards2, goal);
+        } 
+        return false;        
+    }
+}

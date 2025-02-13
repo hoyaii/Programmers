@@ -1,0 +1,41 @@
+import java.util.*;
+class Solution {
+    public int[][] solution(int[][] data, String ext, int val_ext, String sort_by) {
+        List<Integer> list = new ArrayList<>();
+        Map<String, Integer> map = Map.of("code", 0, "date", 1, "maximum", 2, "remain", 3);
+        
+        int ext_idx = map.get(ext);
+        for(int i = 0; i < data.length; i++){
+            if(data[i][ext_idx] < val_ext){
+                list.add(i);
+            }
+        }
+        
+        int[][] answer = new int[list.size()][4];
+        for(int i = 0; i < list.size(); i++){
+            int idx = list.get(i);
+            for(int j = 0; j < 4; j++){
+                answer[i][j] = data[idx][j];
+            }
+        }
+        
+        int sort_by_idx = map.get(sort_by);
+        sort(answer, sort_by_idx);
+        
+        return answer;
+    }
+    
+    private void sort(int[][] arr, int idx){
+        int n = arr.length;
+        
+        for(int i = 0; i < n - 1; i++){
+            for(int j = 0; j < n - i - 1; j++){
+                if(arr[j][idx] > arr[j+1][idx]){
+                    int[] tmp = arr[j+1];
+                    arr[j+1] = arr[j];
+                    arr[j] = tmp;
+                }
+            }
+        }
+    }
+}

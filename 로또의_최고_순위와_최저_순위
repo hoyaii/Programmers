@@ -1,0 +1,19 @@
+import java.util.*;
+class Solution {
+    public int[] solution(int[] lottos, int[] win_nums) {
+        int[] ranks = {6, 6, 5, 4, 3, 2, 1};  // 0개 맞추면 6등, 6개 맞추면 1등
+
+        Set<Integer> winSet = new HashSet<>();
+        for (int num : win_nums) {
+            winSet.add(num);
+        }
+
+        int zero = 0, match = 0;
+        for (int num : lottos) {
+            if (num == 0) zero++;  // 알아볼 수 없는 숫자 개수
+            else if (winSet.contains(num)) match++;  // 당첨된 숫자 개수
+        }
+
+        return new int[]{ranks[match + zero], ranks[match]};
+    }
+}

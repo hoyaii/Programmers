@@ -1,0 +1,280 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}import java.util.*;
+class Solution {
+    public int solution(int[] players, int m, int k) {
+        int answer = 0;
+        Queue<int[]> que = new ArrayDeque<>();
+        
+        int cur = 0, plus = 0;
+
+        for(int i = 0; i < players.length; i++){
+            // 만료 처리
+            if(que.size() != 0){
+                int[] val = que.peek();
+                if(i == val[0]){
+                    cur -= val[1];
+                    que.poll();
+                }
+            }
+            
+            // 서버 증설 필요 상황
+            if((cur + 1) * m <= players[i]){ 
+                plus = (players[i] / m) - cur;
+                
+                answer += plus;
+                cur = players[i] / m;
+                
+                que.offer(new int[]{i + k, plus});
+            }
+        }
+        
+        return answer;
+    }
+}

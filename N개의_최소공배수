@@ -1,0 +1,29 @@
+class Solution {
+    public int solution(int[] arr) {
+        // 첫 두 요소의 최소공배수로 시작
+        int result = lcm(arr[0], arr[1]);
+        
+        // 나머지 요소들에 대해 순차적으로 최소공배수 계산
+        for (int i = 2; i < arr.length; i++) {
+            result = lcm(result, arr[i]);
+        }
+        
+        return result;
+    }
+    
+    // LCM(a, b) = (a * b) / GCD(a, b)
+    private int lcm(int a, int b) {
+        return a / gcd(a, b) * b; // 오버플로우 방지를 위해 먼저 나눔
+    }
+    
+    // GCD(a, b) = GCD(b, a % b)
+    private int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        
+        return a;
+    }
+}

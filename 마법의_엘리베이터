@@ -1,0 +1,19 @@
+class Solution {
+    public int solution(int storey) {
+        int answer = 0;
+        while (storey != 0) {
+            int val = storey % 10;
+            int next = (storey / 10) % 10;   
+
+            if (val < 5 || (val == 5 && next < 5)) {
+                answer += val;
+            } else {
+                answer += 10 - val;
+                storey += 10;           
+            }
+
+            storey /= 10;
+        }
+        return answer;
+    }
+}

@@ -1,0 +1,67 @@
+import java.util.*;
+class Solution {
+    public int solution(int m, int n, String[] board) {
+        char[][] matrix = new char[m][n];
+        for (int i = 0; i < m; i++) {
+            matrix[i] = board[i].toCharArray();
+        }
+
+        int totalRemoved = 0;  
+
+        while (true) {
+            // 이번 라운드에 지울 좌표 표시용 배열
+            boolean[][] toRemove = new boolean[m][n];
+            int roundRemoved = 0;
+
+            // 1st 2×2 블록 탐색
+            for (int i = 0; i < m - 1; i++) {
+                for (int j = 0; j < n - 1; j++) {
+                    char c = matrix[i][j];
+                    if (c == 'X') continue;  // 이미 빈 칸이면 건너뛰기
+
+                    // 오른쪽, 아래, 대각선까지 모두 같으면 제거 표시
+                    if (matrix[i][j + 1] == c
+                     && matrix[i + 1][j] == c
+                     && matrix[i + 1][j + 1] == c) {
+                        toRemove[i][j] = true;
+                        toRemove[i][j + 1] = true;
+                        toRemove[i + 1][j] = true;
+                        toRemove[i + 1][j + 1] = true;
+                    }
+                }
+            }
+
+            // 2nd 삭제 작업 => 삭제한 것은 ‘X’로 바꾸기
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (toRemove[i][j]) {
+                        matrix[i][j] = 'X';
+                        roundRemoved++;
+                    }
+                }
+            }
+
+            // 더 이상 지울 블록이 없으면 종료
+            if (roundRemoved == 0) break;
+            totalRemoved += roundRemoved;
+
+            // 3rd 빈 칸 아래로 내리기 
+            for (int i = m - 1; i >= 0; i--) {
+                for (int j = 0; j < n; j++) {
+                    if (matrix[i][j] == 'X') continue;
+
+                    for (int k = m - 1; k > i; k--) {
+                        if (matrix[k][j] == 'X') {
+                            // i행 j열의 블록을 k행 j열로 내리고
+                            matrix[k][j] = matrix[i][j];
+                            matrix[i][j] = 'X';
+                            break;  // 한 칸만 내려주면 됨
+                        }
+                    }
+                }
+            }
+        }
+
+        return totalRemoved;
+    }
+}

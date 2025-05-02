@@ -1,0 +1,70 @@
+import java.util.*;
+
+class Solution {
+    public String[] solution(String[] orders, int[] course) {
+        Map<String, Integer> cntMap = new HashMap<>(); // <부분 문자, 등장 횟수>
+        int maxCnt[] = new int[11];  // 길이별(2~10) 최댓값값 
+        Map<Integer, List<String>> answerMap = new HashMap<>(); // 정답 후보 맵, <등장 횟수, 정답 후보들>
+        
+        // course에 없는 길이는 사실상 불필요하니 빠르게 체크할 Set
+        Set<Integer> courseSet = new HashSet<>();
+        for (int c : course) courseSet.add(c);
+        
+        // 1st 조합 생성
+        for (String order : orders) {
+            char[] arr = order.toCharArray();
+            Arrays.sort(arr);  
+            
+            // 한 주문에서 중복 없이 세팅하기 위해 Set 사용
+            Set<String> combs = new HashSet<>();
+            backtrack(arr, 0, new StringBuilder(), combs);
+            
+            for (String comb : combs) {
+                cntMap.put(comb, cntMap.getOrDefault(comb, 0) + 1);
+            }
+        }
+        
+        // 2nd 길이별 최댓값 갱신
+        for (Map.Entry<String,Integer> e : cntMap.entrySet()) {
+            String comb = e.getKey();
+            int cnt = e.getValue();
+            int len = comb.length();
+            
+            // 최소 2번 이상, course 목록에 있는 길이만
+            if (cnt < 2 || !courseSet.contains(len)) continue;
+            
+            // 새 최댓값 발견 시
+            if (cnt > maxCnt[len]) { 
+                maxCnt[len] = cnt;
+                answerMap.put(len, new ArrayList<>(List.of(comb)));
+            } else if (cnt == maxCnt[len]) { // 기존 최댓값과 동일할 때
+                answerMap.get(len).add(comb);
+            }
+        }
+        
+        // 3rd 정답 배열 구하기 => course 순서대로 뽑아서 오름차순 정렬 
+        List<String> answer = new ArrayList<>();
+        for (int c : course) {
+            List<String> list = answerMap.getOrDefault(c, Collections.emptyList());
+            answer.addAll(list);
+        }
+        Collections.sort(answer);
+        
+        return answer.toArray(new String[0]);
+    }
+    
+    private void backtrack(char[] arr, int start, StringBuilder sb, Set<String> combs) {
+        // 길이가 2 이상일 때만 추가
+        if (sb.length() >= 2) {
+            combs.add(sb.toString());
+        }
+
+        if (start == arr.length) return;
+        
+        for (int i = start; i < arr.length; i++) {
+            sb.append(arr[i]);
+            backtrack(arr, i + 1, sb, combs);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+}

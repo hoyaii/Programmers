@@ -1,0 +1,27 @@
+import java.util.Arrays;
+class Solution {
+    public int solution(int x, int y, int n) {
+        if (x == y) return 0;
+
+        int[] dp = new int[y + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE); // MAX로 초기화하여 '아직 방문 안 함' 을 명확히 구분
+        dp[x] = 0;
+
+        for (int i = x; i <= y; i++) {
+            // 아직 도달할 수 없는 상태면 건너뛴다
+            if (dp[i] == Integer.MAX_VALUE) continue;
+
+            int nextCount = dp[i] + 1;
+            if (i + n <= y) 
+                dp[i + n] = Math.min(dp[i + n], nextCount);
+            
+            if (i * 2 <= y) 
+                dp[i * 2] = Math.min(dp[i * 2], nextCount);
+            
+            if (i * 3 <= y) 
+                dp[i * 3] = Math.min(dp[i * 3], nextCount);
+        }
+
+        return dp[y] == Integer.MAX_VALUE ? -1 : dp[y];
+    }
+}

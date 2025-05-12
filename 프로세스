@@ -1,0 +1,39 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] priorities, int location) {
+        // 대기 중인 프로세스를 담는 큐
+        Deque<Integer> queue = new ArrayDeque<>();
+        // 현재 남아있는 프로세스 중 가장 높은 우선순위를 체크하기 위한 힙
+        PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Comparator.reverseOrder());
+
+        // 큐와 힙 초기 세팅
+        for (int i = 0; i < priorities.length; i++) {
+            queue.offer(i);
+            maxHeap.offer(priorities[i]);
+        }
+
+        int execCount = 0;
+        while (!queue.isEmpty()) {
+            int curIndex = queue.peek(); // 큐의 맨 앞 프로세스
+            int curPriority = priorities[curIndex]; // 해당 프로세스의 우선순위
+            int maxPriority = maxHeap.peek(); // 남은 프로세스 중 최고 우선순위
+
+            // 뒤로 보내야 할 경우
+            if (curPriority < maxPriority) {
+                queue.poll();
+                queue.offer(curIndex);
+            } else { // 실행 가능한 경우
+                execCount++;
+                queue.poll(); // 큐에서 제거
+                maxHeap.poll(); // 힙에서 제거
+
+                // 찾고 있는 프로세스
+                if (curIndex == location) {
+                    return execCount;
+                }
+            }
+        }
+
+        return execCount;
+    }
+}

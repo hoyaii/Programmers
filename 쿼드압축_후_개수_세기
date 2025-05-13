@@ -1,0 +1,50 @@
+class Solution {
+    public int[] solution(int[][] arr) {
+        return compress(arr, 0, arr.length, 0, arr[0].length);
+    }
+
+    private int[] recur(int[][] arr, int rStart, int rEnd, int cStart, int cEnd)     {
+        int height = rEnd - rStart;
+        int width  = cEnd - cStart;
+
+        // 해당 영역이 1x1 이면 바로 카운팅 (종료 조건 1)
+        if (height == 1 && width == 1) {
+            if (arr[rStart][cStart] == 0) return new int[]{1, 0};
+            else return new int[]{0, 1};
+        }
+
+        // 영역 내 모든 값이 같은지 검사
+        int first = arr[rStart][cStart];
+        boolean allSame = true;
+        outer:
+        for (int i = rStart; i < rEnd; i++) {
+            for (int j = cStart; j < cEnd; j++) {
+                if (arr[i][j] != first) {
+                    allSame = false;
+                    break outer;
+                }
+            }
+        }
+
+        // 모두 같으면 한 개의 블록으로 압축  (종료 조건 2)
+        if (allSame) {
+            if (first == 0) return new int[]{1, 0};
+            else return new int[]{0, 1};
+        }
+
+        // 그렇지 않으면 4등분하여 재귀 합산
+        int midRow = rStart + height / 2;
+        int midCol = cStart + width  / 2;
+
+        int[] topLeft = recur(arr, rStart, midRow, cStart, midCol);
+        int[] topRight = recur(arr, rStart, midRow, midCol, cEnd);
+        int[] bottomLeft = recur(arr, midRow, rEnd, cStart, midCol);
+        int[] bottomRight = recur(arr, midRow, rEnd, midCol, cEnd);
+
+        // 네 분할 영역의 카운트를 합산
+        return new int[]{
+            topLeft[0] + topRight[0] + bottomLeft[0] + bottomRight[0],
+            topLeft[1] + topRight[1] + bottomLeft[1] + bottomRight[1]
+        };
+    }
+}

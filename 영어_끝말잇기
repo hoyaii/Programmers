@@ -1,0 +1,28 @@
+import java.util.*;
+class Solution {
+    public int[] solution(int n, String[] words) {
+        Set<String> usedWords = new HashSet<>();
+        usedWords.add(words[0]);  // 첫 단어는 미리 넣어줌
+        char lastChar = words[0].charAt(words[0].length() - 1);
+
+        for (int i = 1; i < words.length; i++) {
+            String current = words[i];
+
+            // 규칙 위반 검사
+            if (current.length() <= 1 ||
+                current.charAt(0) != lastChar ||
+                usedWords.contains(current)) {
+
+                int person = (i % n) + 1;
+                int turn = (i / n) + 1;
+                return new int[]{person, turn};
+            }
+
+            usedWords.add(current);
+            lastChar = current.charAt(current.length() - 1);
+        }
+
+        return new int[]{0, 0};
+    }
+}
+

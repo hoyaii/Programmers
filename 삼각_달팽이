@@ -1,0 +1,79 @@
+import java.util.*;
+class Solution {
+    public int[] solution(int n) {
+        // 삼각형에 채울 숫자의 총 개수
+        int totalCount = n * (n + 1) / 2;
+        
+        // 꼭짓점 인덱스를 1부터 쓰기 위해 +2 크기
+        int[][] triangle = new int[n + 2][n + 2];
+        boolean[][] visited  = new boolean[n + 2][n + 2];
+        boolean[][] boundary = new boolean[n + 2][n + 2];
+        
+        // boundary 표시 -> (row, col) 칸이 삼각형 내부인지
+        for (int row = 1; row <= n; row++) {
+            for (int col = 1; col <= row; col++) {
+                boundary[row][col] = true;
+            }
+        }
+        
+        // 초기 위치/방향/숫자
+        int r = 1, c = 1;
+        int direction = 1; // 1은 아래, 2는 오른쪽, 3은 대각선 위
+        int currentNum = 1;
+        
+        // 달팽이 채우기 진행
+        while (currentNum <= totalCount) {
+            if (direction == 1) {
+                // 아래 방향
+                while (boundary[r][c] && !visited[r][c]) {
+                    visited[r][c] = true;
+                    triangle[r][c] = currentNum++;
+                    r++;
+                }
+                // 경계 외곽 또는 이미 방문한 칸에서 한 칸 복귀
+                r--;
+                
+                // 방향 전환 -> 오른쪽
+                direction = 2;
+                c++;
+                
+            } else if (direction == 2) {
+                // 오른쪽 방향
+                while (boundary[r][c] && !visited[r][c]) {
+                    visited[r][c] = true;
+                    triangle[r][c] = currentNum++;
+                    c++;
+                }
+                c--;
+                
+                // 방향 전환 -> 대각선 위
+                direction = 3;
+                r--; c--;
+                
+            } else {
+                // 대각선 위 방향
+                while (boundary[r][c] && !visited[r][c]) {
+                    visited[r][c] = true;
+                    triangle[r][c] = currentNum++;
+                    r--; c--;
+                }
+                r++; c++;
+                
+                // 방향 전환 -> 아래
+                direction = 1;
+                r++;
+            }
+        }
+        
+        // 결과를 배열에 순차적으로 담아서 리턴
+        int[] answer = new int[totalCount];
+        int idx = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= i; j++) {
+                answer[idx++] = triangle[i][j];
+            }
+        }
+        
+        return answer;
+    }
+}

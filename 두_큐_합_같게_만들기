@@ -1,0 +1,53 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] queue1, int[] queue2) {
+        Deque<Integer> q1 = new ArrayDeque<>();
+        Deque<Integer> q2 = new ArrayDeque<>();
+        
+        // 초기화
+        long sum1 = 0, sum2 = 0;
+        for (int v : queue1) {
+            q1.offer(v);
+            sum1 += v;
+        }
+        for (int v : queue2) {
+            q2.offer(v);
+            sum2 += v;
+        }
+        
+        // 전체 합이 홀수면 절반으로 나눌 수 없음
+        long total = sum1 + sum2;
+        if (total % 2 != 0) return -1;
+        long target = total / 2;
+        
+        // 최대 연산 횟수 설정 -> 큐의 길이 3배로 잡음
+        int maxOperations = queue1.length * 3;
+        int cnt = 0;
+        
+        // qeue1의 합을 기준으로 target에 맞춰가기 (마치 투포인터처럼)
+        while (cnt <= maxOperations) {
+            if (sum1 == target) {
+                return cnt;     
+            }
+            
+            // sum1이 작으면 q2에서 꺼내 q1에 추가
+            if (sum1 < target) {
+                Integer v = q2.poll();
+                q1.offer(v);
+                sum1 += v;
+                sum2 -= v;
+            } 
+            // sum1이 크면 q1에서 꺼내 q2에 추가
+            else {  
+                Integer v = q1.poll();
+                q2.offer(v);
+                sum1 -= v;
+                sum2 += v;
+            }
+            
+            cnt++;
+        }
+        
+        return -1;
+    }
+}

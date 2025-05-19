@@ -1,0 +1,30 @@
+public String solution(String s) {
+    StringBuilder sb = new StringBuilder(s.length());
+    boolean isStartOfWord = true;  // 현재 처리 중인 문자가 단어의 첫 글자인지 여부
+
+    for (char c : s.toCharArray()) {
+        // 공백인 경우 => 그대로 추가하고 다음 문자를 단어의 첫 글자로 표시
+        if (c == ' ') {
+            sb.append(c);
+            isStartOfWord = true;
+        // 단어의 첫 글자 위치인 경우
+        } else if (isStartOfWord) {    
+            if (Character.isLetter(c)) {
+                sb.append(Character.toUpperCase(c)); // 알파벳은 대문자로
+            } else {
+                sb.append(c); // 알파벳이 아니면 그대로
+            }
+            isStartOfWord = false;
+
+        } else {
+            // 단어의 두 번째 글자 이후인 경우
+            if (Character.isLetter(c)) {
+                sb.append(Character.toLowerCase(c)); // 알파벳은 소문자로
+            } else {
+                sb.append(c); // 알파벳이 아니면 그대로
+            }
+        }
+    }
+
+    return sb.toString();
+}

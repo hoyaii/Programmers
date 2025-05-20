@@ -1,0 +1,26 @@
+import java.util.*;
+class Solution {
+    public int solution(int k, int[] tangerine) {
+        // 각 귤 크기별 수량 계산
+        Map<Integer, Integer> frequency = new HashMap<>();
+        for (int size : tangerine) {
+            frequency.merge(size, 1, Integer::sum);
+        }
+
+        // 빈도 리스트 생성 후 내림차순 정렬
+        List<Integer> counts = new ArrayList<>(frequency.values());
+        counts.sort(Comparator.reverseOrder());
+
+        // 가장 많은 수량부터 k개 이상이 될 때까지 선택
+        int types = 0;
+        for (int count : counts) {
+            k -= count;
+            types++;
+            if (k <= 0) {
+                break;
+            }
+        }
+
+        return types;
+    }
+}

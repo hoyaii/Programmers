@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] arrayA, int[] arrayB) {
+        // 각 배열의 GCD를 구한다
+        int gcdA = totalGcd(arrayA);
+        int gcdB = totalGcd(arrayB);
+
+        // 조건을 만족하는 후보 구하기
+        int candidateA = 0;
+        if (gcdA > 1 && noneDivisible(gcdA, arrayB)) {
+            candidateA = gcdA;
+        }
+
+        int candidateB = 0;
+        if (gcdB > 1 && noneDivisible(gcdB, arrayA)) {
+            candidateB = gcdB;
+        }
+
+        return Math.max(candidateA, candidateB);
+    }
+
+    // 배열 전체의 GCD 구하기
+    private int totalGcd(int[] arr) {
+        int result = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            result = gcd(result, arr[i]);
+            // 중간에 GCD가 1이 되면 더 이상 줄어들 수 없으므로 바로 종료
+            if (result == 1) break;
+        }
+        return result;
+    }
+
+    // 두 수의 GCD
+    private int gcd(int a, int b) {
+        while (b != 0) {
+            int tmp = b;
+            b = a % b;
+            a = tmp;
+        }
+        return a;
+    }
+
+    // 모든 원소가 divisor로 나누어 떨어지지 않는지 검사
+    private boolean noneDivisible(int divisor, int[] arr) {
+        for (int x : arr) {
+            if (x % divisor == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}

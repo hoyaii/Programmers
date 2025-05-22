@@ -1,0 +1,31 @@
+import java.util.*;
+public class Solution {
+    public String solution(String number, int k) {
+        int n = number.length();
+        int keep = n - k; // 최종 남길 문자 수
+        if (keep <= 0) return ""; // 모두 제거할 때
+
+        ArrayDeque<Character> st = new ArrayDeque<>();
+        char[] arr = number.toCharArray();
+
+        for (int i = 0; i < n; i++) {
+            char cur = arr[i];
+
+            // top 값이 cur보다 작고, pop해도 뒤에 남은 문자 수(n - i)로 keep개를 채울 수 있으면 pop
+            while (!st.isEmpty() && st.peek() < cur && keep - st.size() < n - i) {
+                st.pop();
+            }
+
+            // 아직 keep개 미만으로 쌓여 있으면 push
+            if (st.size() < keep) {
+                st.push(cur);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder(keep);
+        while (!st.isEmpty()) {
+            sb.append(st.pop());
+        }
+        return sb.reverse().toString();
+    }
+}

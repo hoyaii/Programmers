@@ -1,0 +1,49 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] order) {
+        Deque<Integer> st = new ArrayDeque<>();
+        Deque<Integer> que = new ArrayDeque<>();
+        int cnt = 0; // 적재된 박스 개수
+        int idx = 1; // 메인 벨트에서 꺼낼 박스 번호
+        
+        // 원하는 순서를 que에 넣어둠
+        for (int val : order) {
+            que.offer(val);
+        }
+        
+        // 메인 벨트에 남은 박스 처리
+        while (idx <= order.length) {
+            // 더 처리할 주문이 없으면 종료
+            if (que.isEmpty()) break;
+            
+            // 메인 벨트에서 바로 꺼낼 수 있음
+            if (idx == que.peek()) {
+                que.poll();   
+                idx++;
+                cnt++;
+                continue;
+            }
+            
+            // 보조 컨테이너에서 꺼낼 수 있으면
+            if (!st.isEmpty() && st.peek().equals(que.peek())) {
+                st.pop();
+                que.poll();
+                cnt++;
+                continue;
+            }
+            
+            // 그 외에는 메인 벨트의 idx 박스를 보조 컨테이너로 이동
+            st.push(idx);
+            idx++;
+        }
+        
+        // 메인 벨트가 끝난 뒤에도, 보조 컨테이너에 남은 박스를 꺼낼 수 있으면 계속 꺼낸다
+        while (!st.isEmpty() && !que.isEmpty() && st.peek().equals(que.peek())) {
+            st.pop();
+            que.poll();
+            cnt++;
+        }
+        
+        return cnt;
+    }
+}

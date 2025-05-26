@@ -1,0 +1,28 @@
+import java.util.*;
+class Solution {
+    public String solution(int n, int t, int m, int p) {
+        // 뽑아야 할 전체 글자 수
+        int required = t * m;
+        
+        // 진법 변환 결과를 한 글자씩 모아둘 리스트
+        List<String> digits = new ArrayList<>();
+        
+        // 0부터 차례대로 n진수로 변환하며, 한 글자씩 추가
+        int num = 0;
+        while (digits.size() < required) {
+            String baseN = Integer.toString(num++, n);     
+            for (char c : baseN.toCharArray()) {
+                digits.add(String.valueOf(c));
+                if (digits.size() == required) break; // 필요한 만큼 채웠으면 종료
+            }
+        }
+        
+        // p번째 플레이어가 말해야 할 t개의 글자만 골라서 StringBuilder에 추가
+        StringBuilder answer = new StringBuilder();
+        for (int idx = p - 1; answer.length() < t; idx += m) {
+            answer.append(digits.get(idx));
+        }
+        
+        return answer.toString().toUpperCase();
+    }
+}

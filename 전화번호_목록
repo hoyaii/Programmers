@@ -1,0 +1,20 @@
+import java.util.*;
+class Solution {
+    public boolean solution(String[] phoneBook) {
+        // 사전순 정렬
+        Arrays.sort(phoneBook);
+
+        // 인접한 두 번호만 비교
+        for (int i = 0; i < phoneBook.length - 1; i++) {
+            String cur = phoneBook[i]; // 앞 번호
+            String next = phoneBook[i + 1]; // 다음 번호
+
+            // next가 cur로 시작하면 접두사 관계
+            if (next.startsWith(cur)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}

@@ -1,0 +1,44 @@
+import java.util.*;
+public class Solution {
+    public int solution(int n, int[][] edge) {
+        // 그래프 인접 리스트 초기화
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] e : edge) {
+            graph.get(e[0]).add(e[1]);
+            graph.get(e[1]).add(e[0]);
+        }
+
+        // 거리를 -1로 초기화 → 아직 방문 안 함을 의미
+        int[] dist = new int[n + 1];
+        Arrays.fill(dist, -1);
+
+        bfs(1, graph, dist);
+
+        // 최대 거리를 가진 노드 카운팅
+        int maxDistance = Arrays.stream(dist).max().getAsInt();
+        long count = Arrays.stream(dist).filter(d -> d == maxDistance).count();
+
+        return (int) count;
+    }
+
+    private void bfs(int start, List<List<Integer>> graph, int[] dist) {
+        Deque<Integer> queue = new ArrayDeque<>();
+        queue.offer(start);
+        dist[start] = 0;
+
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            for (int nxt : graph.get(cur)) {
+                // 아직 방문 안 했으면
+                if (dist[nxt] == -1) {       
+                    dist[nxt] = dist[cur] + 1; // 이전 노드 거리 +1
+                    queue.offer(nxt);
+                }
+            }
+        }
+    }
+}

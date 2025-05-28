@@ -1,0 +1,40 @@
+import java.util.*;
+class Solution {
+    public String[] solution(String[] record) {
+        Map<String, String> userNickMap = new HashMap<>(); 
+        List<String[]> actions = new ArrayList<>(); // 출력할 이벤트 
+        
+        // 1nd 닉네임 등록하거나 갱신
+        for (String rec : record) {
+            String[] parts = rec.split(" ", 3);
+            String cmd = parts[0];
+            String uid = parts[1];
+            
+            if ("Enter".equals(cmd) || "Change".equals(cmd)) {
+                String nick = parts[2];
+                userNickMap.put(uid, nick);
+            }
+            
+            // Enter, Leave는 나중에 출력해야하니 따로 저장 (Change는 출력되지 않음)
+            if ("Enter".equals(cmd) || "Leave".equals(cmd)) {
+                actions.add(new String[]{cmd, uid});
+            }
+        }
+        
+        // 2nd 기록된 이벤트를 바탕으로 최종 메시지 생성
+        String[] answer = new String[actions.size()];
+        for (int i = 0; i < actions.size(); i++) {
+            String cmd = actions.get(i)[0];
+            String uid = actions.get(i)[1];
+            String nick = userNickMap.get(uid);
+            
+            if ("Enter".equals(cmd)) {
+                answer[i] = nick + "님이 들어왔습니다.";
+            } else {  
+                answer[i] = nick + "님이 나갔습니다.";
+            }
+        }
+        
+        return answer;
+    }
+}

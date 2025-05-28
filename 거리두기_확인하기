@@ -1,0 +1,71 @@
+import java.util.*;
+class Solution {
+    public int[] solution(String[][] places) {
+        int[] answer = new int[places.length];
+
+        int[][] d1 = {{-1,0},{1,0},{0,-1},{0,1}}; // 1칸 근처
+        int[][] d2 = {{-2,0},{2,0},{0,-2},{0,2}}; // 2칸 수직/수평
+        int[][] diag = {{-1,-1},{-1,1},{1,-1},{1,1}}; // 2칸 대각선
+
+        for (int idx = 0; idx < places.length; idx++) {
+            String[] place = places[idx];
+      
+            char[][] room = new char[5][5]; // char 배열로 변환
+            for (int i = 0; i < 5; i++) {
+                room[i] = place[i].toCharArray();
+            }
+
+            boolean ok = true;  // 이 방이 거리두기를 지키고 있는지
+            for (int r = 0; r < 5 && ok; r++) {
+                for (int c = 0; c < 5 && ok; c++) {
+                    if (room[r][c] != 'P') continue;
+
+                    // 1st 인접 1칸 검사
+                    for (int[] d : d1) {
+                        int nr = r + d[0], nc = c + d[1];
+                        if (inBounds(nr, nc) && room[nr][nc] == 'P') {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (!ok) break;
+
+                    // 2nd 수직,수평 2칸 검사
+                    for (int[] d : d2) {
+                        int nr = r + d[0], nc = c + d[1];
+                        int mr = r + d[0]/2, mc = c + d[1]/2;  // 중간 칸
+                        if (inBounds(nr, nc) && room[nr][nc] == 'P' && room[mr][mc] != 'X') {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (!ok) break;
+
+                    // 3rd 대각선 검사
+                    for (int[] d : diag) {
+                        int nr = r + d[0], nc = c + d[1];
+
+                        // 대각선 칸 두개 모두 파티션으로 막혀야 거리두기 준수함
+                        int adj1r = r + d[0], adj1c = c; // 세로 방향
+                        int adj2r = r, adj2c = c + d[1]; // 가로 방향
+
+                        if (inBounds(nr, nc) && room[nr][nc] == 'P') {
+                            if (room[adj1r][adj1c] != 'X' || room[adj2r][adj2c] != 'X') {
+                                ok = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            answer[idx] = ok ? 1 : 0;
+        }
+
+        return answer;
+    }
+
+    private boolean inBounds(int r, int c) {
+        return r >= 0 && r < 5 && c >= 0 && c < 5;
+    }
+}

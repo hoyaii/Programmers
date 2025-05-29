@@ -1,0 +1,70 @@
+import java.util.*;
+class Solution {
+    public String solution(String p) {
+        return makeCorrect(p);
+    }
+
+    // p를 올바른 괄호 문자열로 바꿔서 반환     
+    private String makeCorrect(String p) {
+        if (p.isEmpty()) return "";
+
+        // p를 u, v, u의 상태로 분리
+        String[] parts = splitUV(p);
+        String u = parts[0];
+        String v = parts[1];
+        String type = parts[2];  // "O" = 올바른, "X" = 균형만 맞음
+
+        // u가 이미 올바른 괄호이면 -> u + 재귀(v)
+        if ("O".equals(type)) {
+            return u + makeCorrect(v);
+        }
+
+        // u가 균형만 맞고 올바르지 않으면
+        return "(" + makeCorrect(v) + ")" + reverseInner(u);
+    }
+
+    // u의 맨 앞/뒤 문자 제거 후, 나머지 괄호 방향을 뒤집기
+    private String reverseInner(String u) {
+        StringBuilder sb = new StringBuilder(u.length() - 2);
+        for (int i = 1; i < u.length() - 1; i++) {
+            char c = u.charAt(i);
+            sb.append(c == '(' ? ')' : '(');
+        }
+        return sb.toString();
+    }
+
+    
+    // str을 “더 이상 쪼갤 수 없는 최소 균형 문자열” u와 v로 분리
+    private String[] splitUV(String str) {
+        Deque<Character> stack = new ArrayDeque<>();
+        int leftCount  = 0;
+        int rightCount = 0;
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            // 균형 카운팅
+            if (c == '(') leftCount++;
+            else rightCount++;
+
+            // 올바른 괄호 여부 체크용 스택
+            if (!stack.isEmpty() && stack.peek() == '(' && c == ')') {
+                stack.pop();
+            } else {
+                stack.push(c);
+            }
+
+            // 균형을 이룸
+            if (leftCount == rightCount) {
+                String u = str.substring(0, i + 1);
+                String v = str.substring(i + 1);
+                
+                // stack이 비었으면 -> 올바른 괄호 문자열
+                String type = stack.isEmpty() ? "O" : "X";
+                return new String[]{u, v, type};
+            }
+        }
+
+        return new String[]{str, "", "O"};
+    }
+}

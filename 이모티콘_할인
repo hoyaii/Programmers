@@ -1,0 +1,60 @@
+import java.util.*;
+class Solution {
+    int[] SALE_RATES = {10, 20, 30, 40}; // 할인율 후보
+    List<int[]> combos = new ArrayList<>(); // 모든 할인율 조합
+
+    public int[] solution(int[][] users, int[] emoticons) {
+        int m = emoticons.length;
+
+        // 모든 할인율 조합 생성
+        dfs(0, m, new int[m]);
+
+        List<int[]> results = new ArrayList<>();
+        for (int[] rates : combos) {
+            int subscribers = 0;
+            int revenue     = 0;
+
+            for (int[] user : users) {
+                int minRate = user[0];  // 이 할인율 이상이면 구매
+                int joinThreshold = user[1]; // 이 금액 이상이면 플러스 가입
+
+                // 이모티콘 구매 비용 계산
+                int spent = 0;
+                for (int i = 0; i < m; i++) {
+                    if (rates[i] >= minRate) {
+                        spent += emoticons[i] * (100 - rates[i]) / 100;
+                    }
+                }
+
+                if (spent >= joinThreshold) { // 플러스 회원 가입
+                    subscribers++;
+                } else { // 가입 X => 매출로 반영
+                    revenue += spent;
+                }
+            }
+
+            results.add(new int[]{subscribers, revenue});
+        }
+
+        // 가입자 수 우선, 매출 우선 정렬
+        results.sort((a, b) -> {
+            if (a[0] != b[0]) return b[0] - a[0];
+            return b[1] - a[1];
+        });
+
+        return results.get(0);
+    }
+
+    private void dfs(int depth, int m, int[] current) {
+        if (depth == m) {
+            combos.add(current.clone());
+            return;
+        }
+
+        for (int rate : SALE_RATES) {
+            current[depth] = rate;
+            dfs(depth + 1, m, current);
+        }
+    }
+}
+

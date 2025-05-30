@@ -1,0 +1,54 @@
+import java.util.*;
+class Solution {
+    int HIT_COST = 1; 
+    int MISS_COST = 5; 
+
+    public int solution(int cacheSize, String[] cities) {
+        // cacheSize가 0이면 무조건 미스
+        if (cacheSize == 0) return cities.length * MISS_COST;
+
+        Deque<String[]> cacheQueue = new ArrayDeque<>(); // [도시명, 접근시간] 
+        Map<String, Integer> cacheMap = new HashMap<>(); // 도시명 → 마지막 접근 인덱스
+        int totalTime = 0;
+
+        for (int currentIndex = 0; currentIndex < cities.length; currentIndex++) {
+            String city = cities[currentIndex].toLowerCase();
+            boolean isHit = cacheMap.containsKey(city);
+
+            // 비용 계산
+            totalTime += isHit ? HIT_COST : MISS_COST;
+
+            // 캐시 히트 => map에 최신 시간 갱신
+            if (isHit) {
+                cacheMap.put(city, currentIndex);
+                cacheQueue.offer(new String[]{city, String.valueOf(currentIndex)});
+            // 캐시 미스 => 캐시 크기 초과하면 캐시 제거
+            } else {
+                if (cacheMap.size() >= cacheSize) evictLRU(cacheQueue, cacheMap);
+                          
+                cacheMap.put(city, currentIndex);
+                cacheQueue.offer(new String[]{city, String.valueOf(currentIndex)});
+            }
+        }
+
+        return totalTime;
+    }
+
+    private void evictLRU(Deque<String[]> cacheQueue, Map<String, Integer> cacheMap) {
+        while (!cacheQueue.isEmpty()) {
+            String[] head = cacheQueue.peek();
+            String city = head[0];
+            int recordedTime = Integer.parseInt(head[1]);
+            int lastTime = cacheMap.get(city);
+
+            // 갱신되지 않은 데이터는 무시
+            if (recordedTime != lastTime) {
+                cacheQueue.poll();
+            } else { // 갱신이 완료된 데이터면 삭제 (캐시 교체)
+                cacheMap.remove(city);
+                cacheQueue.poll();
+                break;
+            }
+        }
+    }
+}

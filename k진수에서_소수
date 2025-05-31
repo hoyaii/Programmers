@@ -1,0 +1,59 @@
+import java.util.*;
+class Solution {
+    public int solution(int n, int k) {
+        String baseK = Integer.toString(n, k);
+        String[] parts = baseK.split("0");
+
+        // n까지의 에라토스테네스 체 생성
+        boolean[] isPrime = sieve(n);
+
+        int count = 0;
+        for (String part : parts) {
+            if (part.length() == 0) continue;  
+
+            // val이 n 이상 넘어갈 수 있으므로 long으로
+            long val = Long.parseLong(part);
+
+            // val이 n 이하인 경우 => 미리 만든 isPrime 배열로 판정
+            if (val <= n) {
+                if (isPrime[(int) val]) {
+                    count++;
+                }
+            } else {
+                // val이 n을 초과하는 경우 => 작은 제곱근 검사로 직접 소수 판정
+                if (isPrimeLong(val)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private boolean[] sieve(int n) {
+        boolean[] isPrime = new boolean[n + 1];
+        Arrays.fill(isPrime, true);
+        isPrime[0] = false;
+        isPrime[1] = false;
+
+        for (int i = 2; i * i <= n; i++) {
+            if (!isPrime[i]) continue;  
+            for (int j = i * i; j <= n; j += i) {
+                isPrime[j] = false;
+            }
+        }
+
+        return isPrime;
+    }
+
+    // 쌩 for문으로 소수 판별하기
+    private boolean isPrimeLong(long n) {
+        if (n < 2) return false;
+
+        for (long i = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}

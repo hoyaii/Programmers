@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    public int[] solution(String msg) {
+        List<Integer> answer = new ArrayList<>();
+        
+        // 사전
+        Map<String, Integer> dict = new HashMap<>();
+        for (int i = 0; i < 26; i++) {
+            String ch = String.valueOf((char) ('A' + i));
+            dict.put(ch, i + 1);
+        }
+
+        // 사전에서 다음에 추가될 인덱스 번호 => 초기값 27
+        int nextIndex = 27;
+                
+        int pos = 0;  // 현재 msg에서 처리할 시작 인덱스
+        int N = msg.length();
+
+        // msg를 순회하면서 압축 수행
+        while (pos < N) {
+            // 현재 위치에서 사전과 일치하는 가장 긴 문자열 w를 찾아야 함
+            int maxLen = 1; 
+            String w = msg.substring(pos, pos + 1);
+
+            // 점점 길이를 늘려보면서 사전 존재 여부를 확인
+            for (int len = 2; pos + len <= N; len++) { 
+                String candidate = msg.substring(pos, pos + len);
+                if (dict.containsKey(candidate)) { // 사전에 candidate 있음
+                    w = candidate;
+                    maxLen = len;
+                } else { // 사전에 없음
+                    break;
+                }
+            }
+            
+            // 찾은 w의 인덱스를 정답 리스트에 추가 
+            int wIndex = dict.get(w);
+            answer.add(wIndex);
+            
+            // w 다음에 나오는 한 글자 c가 있으면, w+c를 사전에 추가 
+            if (pos + maxLen < N) { // msg 길이보다 작아야함
+                char nextChar = msg.charAt(pos + maxLen);
+                String wPlusC = w + nextChar;
+                dict.put(wPlusC, nextIndex++);
+            }
+            
+            pos += maxLen;
+        }
+        
+        return answer.stream().mapToInt(i -> i).toArray();
+    }
+}

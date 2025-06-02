@@ -1,0 +1,84 @@
+import java.util.*;
+class Solution {
+    public String solution(String m, String[] musicinfos) {
+        // 샤프 붙임음을 단일 문자로 변환 (C#→c, D#→d..)
+        String target = convertSharp(m);
+        
+        // 후보 리스트
+        List<String[]> candidates = new ArrayList<>();
+        
+        int order = 0; // 입력 순서
+        for (String musicinfo : musicinfos) {
+            String[] parts = musicinfo.split(",");
+            String startTime = parts[0];    
+            String endTime = parts[1];    
+            String title = parts[2];   
+            String rawMelody = parts[3];    
+            
+            // 재생 시간 계산 
+            int playTime = calcMinutes(startTime, endTime);
+            
+            // 원본 악보에 있는 샤프 붙임음을 전부 변환
+            String patternMelody = convertSharp(rawMelody);
+            
+            // 실제 재생된 멜로디 문자열 생성 => playTime 만큼 patternMelody를 반복해서 이어붙임
+            String played = buildPlayedMelody(patternMelody, playTime);
+            
+            // target이 이 재생 멜로디 안에 포함되는지 체크
+            if (played.contains(target)) {
+                candidates.add(new String[] {title, String.valueOf(playTime), String.valueOf(order)});
+            }
+            
+            order++;
+        }
+        
+        if (candidates.isEmpty()) return "(None)";
+                    
+        // 정렬 
+        candidates.sort((a, b) -> {
+            // 재생시간은 내림차순
+            int timeA = Integer.parseInt(a[1]);
+            int timeB = Integer.parseInt(b[1]);
+            if (timeA != timeB) {
+                return Integer.compare(timeB, timeA);
+            }
+
+            // 재생시간이 같으면, 입력순서 오름차순
+            int ordA = Integer.parseInt(a[2]);
+            int ordB = Integer.parseInt(b[2]);
+            return Integer.compare(ordA, ordB);
+        });
+        
+        return candidates.get(0)[0];
+    }
+    
+    // 두 시각 간 차이를 분 단위로 계산
+    private int calcMinutes(String t1, String t2) {
+        String[] p1 = t1.split(":");
+        String[] p2 = t2.split(":");
+        int h1 = Integer.parseInt(p1[0]);
+        int m1 = Integer.parseInt(p1[1]);
+        int h2 = Integer.parseInt(p2[0]);
+        int m2 = Integer.parseInt(p2[1]);
+        return (h2 * 60 + m2) - (h1 * 60 + m1);
+    }
+    
+    private String convertSharp(String input) {
+        return input
+            .replaceAll("C#", "c")
+            .replaceAll("D#", "d")
+            .replaceAll("F#", "f")
+            .replaceAll("G#", "g")
+            .replaceAll("A#", "a");
+    }
+    
+    // 재생된 멜로디 문자열을 생성
+    private String buildPlayedMelody(String patternMelody, int playTime) {
+        StringBuilder sb = new StringBuilder();
+        int len = patternMelody.length();
+        for (int i = 0; i < playTime; i++) {
+            sb.append(patternMelody.charAt(i % len));
+        }
+        return sb.toString();
+    }
+}

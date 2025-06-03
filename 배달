@@ -1,0 +1,96 @@
+import java.util.*;
+public class Solution {
+    public int solution(int N, int[][] road, int K) {
+        // 거리 배열 초기화
+        int[] distance = new int[N + 1];
+        Arrays.fill(distance, Integer.MAX_VALUE);
+
+        // 그래프 초기화
+        List<List<Edge>> graph = new ArrayList<>(N + 1);
+        for (int i = 0; i <= N; i++) {
+            graph.add(new ArrayList<>());
+        }
+
+        // 주어진 road 정보를 보고, 양방향 간선 추가
+        for (int[] r : road) {
+            int a = r[0];
+            int b = r[1];
+            int c = r[2];
+            graph.get(a).add(new Edge(b, c));
+            graph.get(b).add(new Edge(a, c));
+        }
+
+        dijkstra(1, graph, distance);
+
+        // distance 배열에 대해 K 이하인 정점 개수 세기
+        int count = 0;
+        for (int i = 1; i <= N; i++) {
+            if (distance[i] <= K) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void dijkstra(int start, List<List<Edge>> graph, int[] distance) {
+        // 우선순위 큐 => distance가 작은 순으로 꺼내도록 설정
+        PriorityQueue<Node> pq = new PriorityQueue<>();
+
+        // 초기화
+        distance[start] = 0;
+        pq.offer(new Node(start, 0));
+
+        // 큐가 빌 때까지
+        while (!pq.isEmpty()) {
+            Node current = pq.poll();
+            int curVertex = current.vertex;
+            int curDist = current.distance;
+
+            // 이미 더 짧은 경로가 존재
+            if (distance[curVertex] < curDist) continue;
+               
+            // 인접한 모든 간선 탐색
+            for (Edge edge : graph.get(curVertex)) {
+                int nextVertex = edge.to;
+                int weight = edge.weight;
+
+                // 현재 정점에서 인접 정점으로 가는 새로운 거리
+                int newDist = curDist + weight;
+
+                // 더 짧은 경로를 찾았으면 갱신하고 큐에 삽입
+                if (distance[nextVertex] > newDist) {
+                    distance[nextVertex] = newDist;
+                    pq.offer(new Node(nextVertex, newDist));
+                }
+            }
+        }
+    }
+
+     // 가중치 그래프의 간선을 나타내는 클래스
+    static class Edge {
+        int to;
+        int weight;
+
+        Edge(int to, int weight) {
+            this.to = to;
+            this.weight = weight;
+        }
+    }
+
+    
+    // 다익스트라 우선순위 큐에 들어갈 노드 객체
+    static class Node implements Comparable<Node> {
+        int vertex;
+        int distance;
+
+        Node(int vertex, int distance) {
+            this.vertex = vertex;
+            this.distance = distance;
+        }
+
+        public int compareTo(Node other) {
+            return Integer.compare(this.distance, other.distance);
+        }
+    }
+}

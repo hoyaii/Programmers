@@ -1,0 +1,34 @@
+import java.util.*;
+public class Solution {
+    public int solution(int[] cards) {
+        boolean[] visited = new boolean[cards.length];
+        List<Integer> groupSizes = new ArrayList<>();
+
+        // 각 인덱스에서 아직 방문하지 않은 사이클이 있으면 사이클 크기 계산
+        for (int i = 0; i < cards.length; i++) {
+            if (!visited[i]) {
+                groupSizes.add(countCycle(cards, i, visited));
+            }
+        }
+
+        // 그룹이 2개 미만이면 0점
+        if (groupSizes.size() < 2) return 0;
+
+        // 내림차순 정렬한 뒤, 가장 큰 두 그룹 곱하기
+        Collections.sort(groupSizes, Comparator.reverseOrder());
+        return groupSizes.get(0) * groupSizes.get(1);
+    }
+
+    private int countCycle(int[] cards, int start, boolean[] visited) {
+        int size = 0;
+        int current = start;
+
+        do {
+            visited[current] = true;
+            current = cards[current] - 1;  // 카드에 적힌 숫자는 1-based index
+            size++;
+        } while (current != start);
+
+        return size;
+    }
+}

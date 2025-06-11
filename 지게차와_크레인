@@ -1,0 +1,83 @@
+import java.util.*;
+class Solution {
+    static char EMPTY = '.';
+    static int[] dx = { 1, -1, 0, 0 };
+    static int[] dy = { 0, 0, 1, -1 };
+
+    public int solution(String[] storage, String[] requests) {
+        int H = storage.length, W = storage[0].length(); // 패딩 포함 크기 X
+        int h = H + 2, w = W + 2; // 패딩 포함 크기
+
+        // 보드 초기화 => 테두리는 EMPTY, 내부에 storage 복사
+        char[][] board = new char[h][w];
+        for (int i = 0; i < h; i++) {
+            Arrays.fill(board[i], EMPTY);
+        }
+
+        for (int i = 0; i < H; i++) {
+            for (int j = 0; j < W; j++) {
+                board[i + 1][j + 1] = storage[i].charAt(j);
+            }
+        }
+
+        for (String req : requests) {
+            char target = req.charAt(0);
+             
+            // 크레인 => 모든 target 삭제
+            if (req.length() == 2) {
+                for (int i = 0; i < h; i++) {
+                    for (int j = 0; j < w; j++) {
+                        if (board[i][j] == target) {
+                            board[i][j] = EMPTY;
+                        }
+                    }
+                }
+            } else {
+                // 지게차 => (0,0) 외부 영역에서 연결된 빈칸만 BFS (접근 가능한 target 삭제)
+                bfs(board, target);
+            }
+        }
+
+        // 남은 컨테이너 카운팅
+        int count = 0;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                if (board[i][j] != EMPTY) count++;
+            }
+        }
+        return count;
+    }
+
+    // (0,0) 부터 EMPTY 영역만 싹 탐색하고, 인접한 target만 삭제
+    private void bfs(char[][] board, char target) {
+        int n = board.length, m = board[0].length;
+        boolean[][] visited = new boolean[n][m];
+        Queue<int[]> queue = new ArrayDeque<>();
+
+        visited[0][0] = true;
+        queue.offer(new int[]{0, 0});
+
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1];
+
+            for (int d = 0; d < 4; d++) {
+                int nx = x + dx[d], ny = y + dy[d];
+
+                // 범위와 방문 여부 체크
+                if (nx < 0 || nx >= n || ny < 0 || ny >= m || visited[nx][ny]) continue;
+
+                visited[nx][ny] = true;
+              
+                // 빈 칸이면 계속 탐색
+                if (board[nx][ny] == EMPTY) {
+                    queue.offer(new int[]{nx, ny});
+                } 
+                // 접근 가능한 target이면 삭제 처리 => BFS 확장은 하지 않음
+                else if (board[nx][ny] == target) {
+                    board[nx][ny] = EMPTY;
+                }
+            }
+        }
+    }
+}

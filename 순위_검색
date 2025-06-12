@@ -1,0 +1,71 @@
+import java.util.*;
+class Solution {
+    public int[] solution(String[] info, String[] query) {
+        // "키(언어/직군/경력/소울푸드 조합) -> 점수 리스트"를 저장할 맵
+        Map<String, List<Integer>> combMap = new HashMap<>();
+
+        // 지원자 정보 처리
+        for (String s : info) {
+            String[] parts = s.split(" ");
+            String[] attrs = new String[]{ parts[0], parts[1], parts[2], parts[3] };
+            int score = Integer.parseInt(parts[4]); // 점수
+
+            // 각 속성마다 값 또는 "-" 를 조합해 총 2^4=16개 키 생성
+            for (String lan  : new String[]{ attrs[0], "-" }) {
+                for (String job  : new String[]{ attrs[1], "-" }) {
+                    for (String year : new String[]{ attrs[2], "-" }) {
+                        for (String food : new String[]{ attrs[3], "-" }) {
+                            String key = lan + " " + job + " " + year + " " + food;
+                            combMap.computeIfAbsent(key, k -> new ArrayList<>())
+                                   .add(score);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 나중에 이진 탐색을 사용하기 위해, 각 키별 점수 리스트를 오름차순 정렬
+        for (List<Integer> list : combMap.values()) {
+            Collections.sort(list);
+        }
+
+        // 쿼리 처리
+        int[] answer = new int[query.length];
+        for (int i = 0; i < query.length; i++) {
+            String[] tokens = query[i].replaceAll(" and ", " ").split(" ");
+
+            // 앞 4개 토큰을 조합해 키 생성
+            String key = tokens[0] + " " + tokens[1] + " " + tokens[2] + " " + tokens[3];
+            int target = Integer.parseInt(tokens[4]);
+
+            // 맵에서 해당 키의 점수 리스트 가져오기
+            List<Integer> scores = combMap.getOrDefault(key, new ArrayList<>());
+
+            // 이진 탐색으로 'target 이상'인 첫 위치 구하기
+            int idx = lowerBound(scores, target);
+   
+            answer[i] = scores.size() - idx;
+        }
+
+        return answer;
+    }
+
+    private int lowerBound(List<Integer> list, int target) {
+        int lo = 0, hi = list.size();
+
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+
+            // mid 위치 점수가 기준보다 작음
+            if (list.get(mid) < target) {
+                lo = mid + 1;
+            }
+            // mid 위치 점수가 기준보다 큼
+            else {
+                hi = mid;
+            }
+        }
+        
+        return lo;
+    }
+}

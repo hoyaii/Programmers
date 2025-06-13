@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    public long solution(int cap, int n, int[] deliveries, int[] pickups) {
+        Deque<int[]> delSt = new ArrayDeque<>();
+        Deque<int[]> picSt = new ArrayDeque<>();
+
+        for (int i = 0; i < n; i++) {
+            if (deliveries[i] > 0) delSt.push(new int[]{ deliveries[i], i + 1 });
+            if (pickups[i] > 0) picSt.push(new int[]{ pickups[i], i + 1 });
+        }
+
+        long totalDistance = 0;
+
+        // 배달하거나 수거할 게  남아 있는 동안 반복
+        while (!delSt.isEmpty() || !picSt.isEmpty()) {
+            int remainD = cap, remainP = cap, farthest = 0;
+
+            // 배달 처리
+            while (!delSt.isEmpty()) {
+                int[] top = delSt.peek();
+                farthest = Math.max(farthest, top[1]);
+
+                if (top[0] <= remainD) { // cap 여유 있음
+                    remainD -= top[0];
+                    delSt.pop();
+                } else { // cap 여유 없음
+                    top[0] -= remainD;
+                    break;
+                }
+            }
+
+            // 수거 처리 
+            while (!picSt.isEmpty()) {
+                int[] top = picSt.peek();
+                farthest = Math.max(farthest, top[1]);
+
+                if (top[0] <= remainP) { // cap 여유 있음
+                    remainP -= top[0];
+                    picSt.pop();
+                } else { // cap 여유 없음
+                    top[0] -= remainP;
+                    break;
+                }
+            }
+
+            // 왕복 거리 더하기
+            totalDistance += (long) farthest * 2;
+        }
+
+        return totalDistance;
+    }
+}

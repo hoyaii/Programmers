@@ -1,0 +1,44 @@
+public class Solution {
+    public int solution(int[] diffs, int[] times, long limit) {
+        // 이진 탐색 범위는 최소 1, 최대 diffs의 최댓값
+        int low = 1;
+        int high = 0;
+        for (int d : diffs) {
+            high = Math.max(high, d);
+        }
+
+        // 이진 탐색으로 최소 level 탐색 
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (canSolve(mid, diffs, times, limit)) {
+                high = mid; // mid 레벨로도 가능하면 더 낮은 레벨 시도
+            } else {
+                low = mid + 1; // mid 레벨로 불가능하면 레벨 올리기
+            }
+        }
+        return low;
+    }
+
+    private boolean canSolve(int level, int[] diffs, int[] times, long limit) {
+        long totalTime = 0;
+        int prevTime = 0;
+
+        for (int i = 0; i < diffs.length; i++) {
+            int diff = diffs[i];
+            int curTime = times[i];
+
+            if (diff <= level) { // 틀리지 않고 한방에 해결     
+                totalTime += curTime;
+            } else { // 한방에 해결불가
+                int fails = diff - level;
+                totalTime += (long)fails * (curTime + prevTime) + curTime;
+            }
+
+            // 제한 시간 초과
+            if (totalTime > limit) return false;
+  
+            prevTime = curTime;
+        }
+        return true;
+    }
+}

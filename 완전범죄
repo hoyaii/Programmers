@@ -1,0 +1,41 @@
+import java.util.Arrays;
+class Solution {
+    public int solution(int[][] info, int n, int m) {
+        int items = info.length;
+        final int INF = Integer.MAX_VALUE / 2;  
+        
+        // dp[i][bj] = 첫 i개 물건을 처리했을 때, B가 남긴 흔적 합이 bj일 때 A가 남긴 흔적의 최소 합
+        int[][] dp = new int[items + 1][m];
+        for (int i = 0; i <= items; i++) Arrays.fill(dp[i], INF);
+        dp[0][0] = 0;  // 아무 것도 훔치지 않았을 때 A=0, B=0
+        
+        // 물건 하나씩 처리하며 전이
+        for (int i = 0; i < items; i++) {
+            int a = info[i][0];
+            int b = info[i][1];
+            
+            for (int bj = 0; bj < m; bj++) {
+                if (dp[i][bj] == INF) continue;
+                int ai = dp[i][bj];
+                
+                // A가 훔칠 경우 => A의 누적 흔적 < n 이어야 함
+                if (ai + a < n) {
+                    dp[i + 1][bj] = Math.min(dp[i + 1][bj], ai + a);
+                }
+                
+                // B가 훔칠 경우 => B의 누적 흔적 < m 이어야 함
+                if (bj + b < m) {
+                    dp[i + 1][bj + b] = Math.min(dp[i + 1][bj + b], ai);
+                }
+            }
+        }
+        
+        // A 흔적 최소값 선택
+        int answer = INF;
+        for (int bj = 0; bj < m; bj++) {
+            answer = Math.min(answer, dp[items][bj]);
+        }
+        
+        return (answer >= INF ? -1 : answer);
+    }
+}

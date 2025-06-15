@@ -1,0 +1,27 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] people, int limit) {
+        Arrays.sort(people);
+
+        int left = 0;                
+        int right = people.length - 1;
+        int boats = 0;
+
+        // 두 명 이상이 남아 있을 때
+        while (left < right) {
+            // 가장 가벼운 사람 + 가장 무거운 사람 수용 가능 => 가장 가벼운 사람 입장에서 optimal 케이스
+            if (people[left] + people[right] <= limit) {
+                left++;
+                right--;
+            } else { // 수용 불가 => 가장 무거운 사람은 어떠한 경우에도 함께 탑승 불가
+                right--;
+            }
+            boats++;
+        }
+
+        // 한 사람만 남았다면
+        if (left == right) boats++;
+
+        return boats;
+    }
+}

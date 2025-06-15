@@ -1,0 +1,37 @@
+public class Solution {
+    public int solution(int n, long l, long r) {
+        // 5^0 … 5^(n-1) 미리 계산
+        long[] pow5 = new long[n];
+        pow5[0] = 1;
+        for (int i = 1; i < n; i++) {
+            pow5[i] = pow5[i - 1] * 5;
+        }
+
+        // l부터 r까지 하나씩 검사
+        int count = 0;
+        for (long idx = l - 1; idx < r; idx++) {
+            if (isOneBit(idx, n, pow5)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private boolean isOneBit(long idx, int n, long[] pow5) {
+        long x = idx;
+        
+        // 최상위 레벨(n-1)부터 레벨 0까지
+        for (int level = n - 1; level >= 0; level--) {
+            long block = x / pow5[level];  // 0,1,2,3,4 중 하나
+            
+            // 3번째 블록(“00000”)에 속하면 무조건 0
+            if (block == 2) {
+                return false; 
+            }
+            
+            x %= pow5[level];  // 하위 레벨로 내려가며 재계산
+        }
+        
+        return true; // 한번도 블록2에 걸리지 않았으면 1
+    }
+}

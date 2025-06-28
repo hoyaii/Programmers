@@ -1,0 +1,45 @@
+import java.util.*;
+public class Solution {
+    public int solution(String str1, String str2) {
+        str1 = str1.toLowerCase();
+        str2 = str2.toLowerCase();
+
+        // <쪼개진 문자, 빈도>를 저장하는 맵 
+        Map<String, Integer> freq1 = buildMap(str1);
+        Map<String, Integer> freq2 = buildMap(str2);
+
+        // 두 맵의 모든 키를 한 번에 모으는 Set
+        Set<String> set = new HashSet<>(freq1.keySet());
+        set.addAll(freq2.keySet());
+
+        // 교집합과 합집합 크기 계산
+        int intersection = 0;
+        int union = 0;
+
+        for (String key : set) {
+            int c1 = freq1.getOrDefault(key, 0);
+            int c2 = freq2.getOrDefault(key, 0);
+            intersection += Math.min(c1, c2);
+            union += Math.max(c1, c2);
+        }
+
+        // 집합이 그냥 비어있음 
+        if (set.isEmpty()) return 65536;
+
+        return (int) ((long) intersection * 65536 / union);
+    }
+
+    private Map<String, Integer> buildMap(String s) {
+        Map<String, Integer> map = new HashMap<>();
+        for (int i = 0, end = s.length() - 1; i < end; i++) {
+            char c1 = s.charAt(i);
+            char c2 = s.charAt(i + 1);
+
+            if (Character.isLetter(c1) && Character.isLetter(c2)) {
+                String bigram = "" + c1 + c2;
+                map.put(bigram, map.getOrDefault(bigram, 0) + 1);
+            }
+        }
+        return map;
+    }
+}

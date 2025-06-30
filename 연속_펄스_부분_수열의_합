@@ -1,0 +1,23 @@
+class Solution {
+    public long solution(int[] sequence) {
+        int n = sequence.length;
+        // f는 +1로 시작, g는 -1로 시작
+        long[] f = new long[n], g = new long[n];
+        
+        f[0] = sequence[0];
+        g[0] = -sequence[0];
+        long answer = Math.max(f[0], g[0]);
+        
+        for (int i = 1; i < n; i++) {
+            long x = sequence[i];
+            // i에서 끝나는 구간, +1로 시작했을 때
+            f[i] = Math.max(x, g[i-1] + x);  // 이전은 -1로 끝났으니 +1로 붙임
+            // i에서 끝나는 구간, -1로 시작했을 때
+            g[i] = Math.max(-x, f[i-1] - x);  // 이전은 +1로 끝났으니 -1로 붙임
+            
+            answer = Math.max(answer, Math.max(f[i], g[i]));
+        }
+        
+        return answer;
+    }
+}

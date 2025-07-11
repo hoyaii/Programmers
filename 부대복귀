@@ -1,0 +1,45 @@
+import java.util.*;
+class Solution {
+    public int[] solution(int n, int[][] roads, int[] sources, int destination) {
+        // 그래프는 인접 리스트로
+        List<List<Integer>> graph = new ArrayList<>(n + 1);
+        for (int i = 0; i <= n; i++) {
+            graph.add(new ArrayList<>());
+        }
+
+        for (int[] r : roads) {
+            graph.get(r[0]).add(r[1]);
+            graph.get(r[1]).add(r[0]);
+        }
+
+        // destination에서 한 번만 BFS -> 모든 정점까지 최단 거리 계산
+        int[] dist = bfs(n, graph, destination);
+
+        int[] answer = new int[sources.length];
+        for (int i = 0; i < sources.length; i++) {
+            answer[i] = dist[sources[i]];
+        }
+
+        return answer;
+    }
+
+    private int[] bfs(int n, List<List<Integer>> graph, int start) {
+        int[] dist = new int[n + 1];
+        Arrays.fill(dist, -1);         
+        Queue<Integer> q = new ArrayDeque<>();
+
+        dist[start] = 0;
+        q.offer(start);
+
+        while (!q.isEmpty()) {
+            int cur = q.poll();
+            for (int nxt : graph.get(cur)) {
+                if (dist[nxt] != -1) continue; 
+                dist[nxt] = dist[cur] + 1;
+                q.offer(nxt);
+            }
+        }
+        
+        return dist;
+    }
+}

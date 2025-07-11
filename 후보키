@@ -1,0 +1,62 @@
+import java.util.*;
+public class Solution {
+    public int solution(String[][] relation) {
+        int colCount = relation[0].length;
+        
+        // 후보 키를 저장할 리스트
+        List<Set<Integer>> candidates = new ArrayList<>();
+        
+        // 길이 1부터 colCount까지 모든 조합 생성
+        for (int len = 1; len <= colCount; len++) {
+            backtrack(0, 0, len, colCount, new LinkedHashSet<>(), relation, candidates);
+        }
+        
+        return candidates.size();
+    }
+    
+    private void backtrack(int start, int depth, int targetLen, int colCount,
+                           Set<Integer> current, String[][] relation,
+                           List<Set<Integer>> candidates) {
+        // 목표 길이에 도달하면 최소성·유일성 검사
+        if (depth == targetLen) {
+            // 최소성 검사 -> 이미 채택된 후보키가 current의 부분집합이면 패스
+            for (Set<Integer> key : candidates) {
+                if (current.containsAll(key)) {
+                    return;
+                }
+            }
+
+            // 유일성 검사
+            if (isUnique(current, relation)) {
+                // 현재 조합을 후보키로 추가 by HashSet 복사
+                candidates.add(new HashSet<>(current));
+            }
+            return;
+        }
+        
+        for (int col = start; col < colCount; col++) {
+            current.add(col);
+            backtrack(col + 1, depth + 1, targetLen, colCount, current, relation, candidates);
+            current.remove(col);
+        }
+    }
+    
+    // 선택된 컬럼 집합이 유일성을 만족하는지 체크
+    private boolean isUnique(Set<Integer> cols, String[][] relation) {
+        Set<String> seen = new HashSet<>();
+        
+        for (String[] row : relation) {
+            StringBuilder keyBuilder = new StringBuilder();
+            for (int idx : cols) {
+                keyBuilder.append(row[idx]);  
+            }
+            String key = keyBuilder.toString();
+
+            // 중복되면 false
+            if (!seen.add(key)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}

@@ -1,0 +1,61 @@
+import java.util.*;
+class Solution {
+    public int solution(int[][] scores) {
+        int n = scores.length;
+
+        // [attitude, peer, id] 형태의 리스트
+        List<int[]> employees = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            employees.add(new int[]{scores[i][0], scores[i][1], i + 1});
+        }
+
+        // 근무 태도 기준 오름차순, 동료 평가 기준은 내림차순 정렬
+        employees.sort((a, b) -> a[0] == b[0]
+                ? Integer.compare(b[1], a[1])
+                : Integer.compare(a[0], b[0]));
+
+        // 두 점수가 모두 낮은 경우가 있는 사원은 제외하고, 나머지는 candidates에 추가
+        List<int[]> candidates = new ArrayList<>();
+
+        int[] top = employees.get(n - 1);
+        candidates.add(new int[]{top[0] + top[1], top[2]});
+        int maxPeer = top[1];
+
+        // '근무 태도' 점수가 높은 순에서 낮은 순으로 스캔하면서, '동료 평가' 점수의 최대 값은 트래킹
+        for (int i = n - 2; i >= 0; i--) {
+            int[] curr = employees.get(i);
+            int att = curr[0], peer = curr[1], id = curr[2];
+
+            // 동료 평가 점수가 최대값 이상이라면 제외되지 않고, 미만이라면 둘 다 낮은 걸로 제외
+            if (peer >= maxPeer) {
+                candidates.add(new int[]{att + peer, id});
+                maxPeer = peer;
+            }
+        }
+
+        // 합계 기준 내림차순, 합계 같으면 id 오름차순 정렬
+        candidates.sort((a, b) -> a[0] == b[0]
+                ? Integer.compare(a[1], b[1])
+                : Integer.compare(b[0], a[0]));
+
+        // 경쟁 순위 계산 => 동석차 건너뛴다
+        int rank = 1, prevSum = -1, tieCount = 0;
+        for (int[] c : candidates) {
+            int sum = c[0], id = c[1];
+            if (sum != prevSum) {
+                rank += tieCount; // 새로운 합계면 직전 동석차만큼 건너뛰기
+                tieCount = 1;      
+                prevSum = sum;
+            } else {
+                tieCount++; // 같은 합계면 동석차++
+            }
+
+            if (id == 1) { // 완호의 석차
+                return rank;       
+            }
+        }
+
+        return -1;  // 인센티브 대상이 아님
+    }
+}
+

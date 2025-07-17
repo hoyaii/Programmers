@@ -1,0 +1,55 @@
+class Solution {
+    static int r, c; // 행 개수, 열 개수
+    static boolean success; // 답을 찾았는지 여부
+
+    public int solution(int[][] beginning, int[][] target) {
+        r = beginning.length;
+        c = beginning[0].length;
+
+        // 0회부터 r+c회까지 뒤집기 횟수를 늘려가며 탐색
+        for (int cnt = 0; cnt <= r + c; cnt++) {
+            success = false;
+            backtrack(0, 0, cnt, beginning, target);
+            if (success) return cnt;
+        }
+        return -1;
+    }
+
+    private void backtrack(int start, int depth, int targetCnt, int[][] board, int[][] target) {
+        // 성공했으면 그냥 바로 리턴
+        if (success) return; 
+
+        // 필요한 횟수만큼 뒤집었다면 결과 비교
+        if (depth == targetCnt) {
+            if (isSame(board, target)) success = true;
+            return;
+        }
+
+        for (int i = start; i < r + c; i++) {
+            if (i < r) {
+                // 행 i 뒤집기
+                int row = i;
+                for (int col = 0; col < c; col++) board[row][col] ^= 1;
+                // *** start값은 i+1을 받아야함
+                backtrack(i + 1, depth + 1, targetCnt, board, target);
+                for (int col = 0; j < c; col++) board[row][col] ^= 1;  // 복구
+            } else {
+                // 열 (i-r) 뒤집기
+                int col = i - r;
+                for (int row = 0; row < r; row++) board[row][col] ^= 1;
+                backtrack(i + 1, depth + 1, targetCnt, board, target);
+                for (int row = 0; row < r; row++) board[row][col] ^= 1;  // 복구
+            }
+        }
+    }
+
+    // 두 배열이 완전히 일치하는지 검사
+    private boolean isSame(int[][] a, int[][] b) {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                if (a[i][j] != b[i][j]) return false;
+            }
+        }
+        return true;
+    }
+}

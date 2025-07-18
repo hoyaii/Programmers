@@ -1,0 +1,123 @@
+import java.util.*;
+class Solution {
+    static int r_len, c_len;
+    static int[] dr = {1, -1, 0, 0};
+    static int[] dc = {0, 0, 1, -1};
+
+    public int solution(int[][] game_board, int[][] table) {
+        r_len = table.length;
+        c_len = table[0].length;
+
+        List<List<Set<List<Integer>>>> pieces = new ArrayList<>(); 
+        boolean[][] table_visited = new boolean[r_len][c_len];
+
+        for (int i = 0; i < r_len; i++) {
+            for (int j = 0; j < c_len; j++) {
+                if (table[i][j] == 1 && !table_visited[i][j]) {
+                    Set<List<Integer>> raw = new HashSet<>();
+                    bfs(i, j, table, raw, table_visited, 1);
+
+                    pieces.add(buildRotations(raw));
+                }
+            }
+        }
+
+        boolean[][] board_visited = new boolean[r_len][c_len];
+        boolean[] usedPiece = new boolean[pieces.size()];         
+        int answer = 0;
+
+        for (int i = 0; i < r_len; i++) {
+            for (int j = 0; j < c_len; j++) {
+                if (game_board[i][j] == 0 && !board_visited[i][j]) {
+                    Set<List<Integer>> blank = new HashSet<>();
+                    int size = bfs(i, j, game_board, blank, board_visited, 0);
+                    normalize(blank);                              
+                    
+                    for (int p = 0; p < pieces.size(); p++) {
+                        if (usedPiece[p]) continue;
+                        for (Set<List<Integer>> rot : pieces.get(p)) {
+                            if (rot.equals(blank)) {
+                                usedPiece[p] = true;              
+                                answer += size;
+                                blank = null;                    
+                                break;
+                            }
+                        }
+                        if (usedPiece[p]) break;
+                    }
+                }
+            }
+        }
+        return answer;
+    }
+
+    private int bfs(int sr, int sc, int[][] board,
+                    Set<List<Integer>> record, boolean[][] visited, int flag) {
+
+        Queue<int[]> que = new ArrayDeque<>();
+        que.offer(new int[]{sr, sc});
+        visited[sr][sc] = true;
+        record.add(Arrays.asList(sr, sc));
+        int width = 1;
+
+        while (!que.isEmpty()) {
+            int[] cur = que.poll();
+            int r = cur[0], c = cur[1];
+
+            for (int k = 0; k < 4; k++) {
+                int nr = r + dr[k], nc = c + dc[k];
+                if (nr < 0 || nr >= r_len || nc < 0 || nc >= c_len) continue;
+                if (board[nr][nc] == flag && !visited[nr][nc]) {
+                    visited[nr][nc] = true;
+                    que.offer(new int[]{nr, nc});
+                    record.add(Arrays.asList(nr, nc));
+                    width++;
+                }
+            }
+        }
+        return width;
+    }
+
+    private List<Set<List<Integer>>> buildRotations(Set<List<Integer>> origin) {
+        List<Set<List<Integer>>> list = new ArrayList<>();
+        Set<List<Integer>> cur = deepCopy(origin);
+
+        for (int t = 0; t < 4; t++) {
+            normalize(cur);
+            list.add(cur);
+            cur = rotate90(cur);          
+        }
+        return list;
+    }
+
+    private Set<List<Integer>> rotate90(Set<List<Integer>> src) {
+        Set<List<Integer>> dst = new HashSet<>();
+        for (List<Integer> pos : src) {
+            int r = pos.get(0), c = pos.get(1);
+            dst.add(Arrays.asList(c, -r));
+        }
+        return dst;
+    }
+
+    private Set<List<Integer>> deepCopy(Set<List<Integer>> src) {
+        Set<List<Integer>> dst = new HashSet<>();
+        for (List<Integer> p : src)
+            dst.add(Arrays.asList(p.get(0), p.get(1)));
+        return dst;
+    }
+
+    private void normalize(Set<List<Integer>> record) {
+        int rMin = Integer.MAX_VALUE, cMin = Integer.MAX_VALUE;
+        for (List<Integer> p : record) {
+            rMin = Math.min(rMin, p.get(0));
+            cMin = Math.min(cMin, p.get(1));
+        }
+        
+        Set<List<Integer>> moved = new HashSet<>();
+        for (List<Integer> p : record)
+            moved.add(Arrays.asList(p.get(0) - rMin, p.get(1) - cMin));
+
+        record.clear();          
+        record.addAll(moved);    
+    }
+}

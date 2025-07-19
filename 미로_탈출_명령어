@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    // d, l, r, u 순서
+    static char[] DIR = {'d', 'l', 'r', 'u'};
+    static int[] dr = { 1,  0,  0, -1};
+    static int[] dc = { 0, -1,  1,  0};
+
+    static int r_len, c_len;
+    static String answer = "impossible"; // 가장 빠른 경로 하나만 저장
+    static boolean found = false;
+
+    public String solution(int n, int m, int x, int y, int r, int c, int k) {
+        r_len = n;
+        c_len = m;
+
+        // 최소 거리보다 짧거나, 남은 칸 수가 홀수면 불가능
+        int dist = Math.abs(x - r) + Math.abs(y - c);
+        if (dist > k || ((k - dist) & 1) == 1) return "impossible";
+
+        dfs(k, x, y, r, c, 0, new StringBuilder());
+        return answer;
+    }
+
+    private void dfs(int k, int sr, int sc, int tr, int tc, int depth, StringBuilder path) {
+        // 이미 최단 경로를 찾았는지 체크 
+        if (found) return; 
+
+        // 도달 불가능한지 체크
+        int need = Math.abs(sr - tr) + Math.abs(sc - tc);
+        int remain = k - depth;
+        if (need > remain || (remain - need) % 2 == 1) return;
+
+        // k만큼 이동 완료
+        if (depth == k && sr == tr && sc == tc) { 
+            answer = path.toString(); // 최초로 찾은 경로 = 사전순 최소
+            found = true;
+            return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int nr = sr + dr[i];
+            int nc = sc + dc[i];
+
+            if (nr <= 0 || nr > r_len || nc <= 0 || nc > c_len) continue;
+
+            // 방향 문자 추가
+            path.append(DIR[i]);
+            dfs(k, nr, nc, tr, tc, depth + 1, path);
+            path.deleteCharAt(path.length() - 1); // 원상복구
+        }
+    }
+}

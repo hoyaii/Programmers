@@ -1,0 +1,65 @@
+import java.util.*;
+class Solution {
+    public int[] solution(int target) {
+        // DP 배열
+        int[] dartCnt = new int[100001];  // 최소 투척 수
+        int[] singleCnt = new int[100001];  // 싱글·불 사용 횟수
+        Arrays.fill(dartCnt, Integer.MAX_VALUE);
+        dartCnt[target] = 0;  // 시작 점수
+
+        // target → 0 으로 TOP-DOWN 방식으로 DP 처리
+        for (int cur = target; cur >= 1; cur--) {
+            // 싱글(1~20) 
+            for (int p = 1; p <= 20 && cur - p >= 0; p++) {
+                int next = cur - p;
+                int candDarts = dartCnt[cur] + 1;
+                int candSingles = singleCnt[cur] + 1; // 싱글이라 +1
+
+                if (dartCnt[next] > candDarts) {
+                    dartCnt[next]   = candDarts;
+                    singleCnt[next] = candSingles;
+                } else if (dartCnt[next] == candDarts && singleCnt[next] < candSingles) {
+                    singleCnt[next] = candSingles;
+                }
+            }
+
+            // 더블(2,4,..,40) -> 싱글·불 카운트 변화 없음 
+            for (int p = 2; p <= 40 && cur - p >= 0; p += 2) {
+                int next = cur - p;
+                int candDarts = dartCnt[cur] + 1;
+
+                if (dartCnt[next] > candDarts) {
+                    dartCnt[next] = candDarts;
+                    singleCnt[next] = singleCnt[cur];
+                }
+            }
+
+            // 트리플(3,6,..,60) 
+            for (int p = 3; p <= 60 && cur - p >= 0; p += 3) {
+                int next = cur - p;
+                int candDarts = dartCnt[cur] + 1;
+
+                if (dartCnt[next] > candDarts) {
+                    dartCnt[next] = candDarts;
+                    singleCnt[next] = singleCnt[cur];
+                }
+            }
+
+            // 불(50)
+            if (cur - 50 >= 0) {
+                int next = cur - 50;
+                int candDarts = dartCnt[cur] + 1;
+                int candSingles = singleCnt[cur] + 1; // 불도 싱글로 간주
+
+                if (dartCnt[next] > candDarts) {
+                    dartCnt[next]  = candDarts;
+                    singleCnt[next] = candSingles;
+                } else if (dartCnt[next] == candDarts && singleCnt[next] < candSingles) {
+                    singleCnt[next] = candSingles;
+                }
+            }
+        }
+
+        return new int[] { dartCnt[0], singleCnt[0] };
+    }
+}

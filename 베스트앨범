@@ -1,0 +1,58 @@
+import java.util.*;
+class Solution {
+    public int[] solution(String[] genres, int[] plays) {
+        int len = genres.length;
+        
+        Map<String, List<int[]>> songsByGenre = new HashMap<>(); // <장르, 해당 장르의 곡 {재생수, 인덱스}>
+        Map<String, Integer> totalPlaysByGenre = new HashMap<>(); // <장르, 장르 총 재생수>
+        
+        // <장르, 해당 장르의 곡 {plays, idx}> 맵 & <장르, 장르 총 재생수> 맵 구성
+        for (int i = 0; i < len; i++) {
+            List<int[]> songs = songsByGenre.getOrDefault(genres[i], new ArrayList<>());
+            songs.add(new int[]{plays[i], i});
+            songsByGenre.put(genres[i], songs);
+            
+            int sum = totalPlaysByGenre.getOrDefault(genres[i], 0);
+            totalPlaysByGenre.put(genres[i], sum + plays[i]);
+        }
+        
+        // 베스트 앨범 
+        List<int[]> candidates = new ArrayList<>(); // {장르총합, 곡재생수, 곡인덱스}
+
+         // 맵을 돌면서 정렬 후, 두 곡만 뽑아서 베스트 앨범에 추가
+        for (String genre : songsByGenre.keySet()) {
+            List<int[]> songs = songsByGenre.get(genre);
+            songs.sort((a, b) -> {
+                if (a[0] == b[0]) { // 재생수 동일 → 인덱스 오름차순
+                    return Integer.compare(a[1], b[1]);
+                }
+                return Integer.compare(b[0], a[0]); // 재생수 내림차순
+            });
+            
+            // 첫 번째 곡
+            int[] first = songs.get(0);
+            candidates.add(new int[]{totalPlaysByGenre.get(genre), first[0], first[1]});
+            
+            // 두 번째 곡
+            if (songs.size() >= 2) {
+                int[] second = songs.get(1);
+                candidates.add(new int[]{totalPlaysByGenre.get(genre), second[0], second[1]});
+            }
+        }
+        
+        // 베스트 앨범 정렬 (장르 총 재생수 내림차순 → 곡 재생수 내림차순 → 인덱스 오름차순)
+        candidates.sort((a, b) -> {
+            if (a[0] == b[0]) {
+                if (a[1] == b[1]) return Integer.compare(a[2], b[2]);
+                return Integer.compare(b[1], a[1]);
+            }
+            return Integer.compare(b[0], a[0]);
+        });
+        
+        int[] answer = new int[candidates.size()];
+        for (int i = 0; i < candidates.size(); i++) {
+            answer[i] = candidates.get(i)[2];
+        }
+        return answer;
+    }
+}

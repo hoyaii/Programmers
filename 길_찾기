@@ -1,0 +1,81 @@
+import java.util.*;
+public class Solution {
+    private class Node {
+        int num; // 노드 번호 (1~n)
+        int x, y;   
+        Node left, right;
+
+        Node(int num, int x, int y) {
+            this.num = num;
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public int[][] solution(int[][] nodeinfo) {
+        int n = nodeinfo.length;
+
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            // i+1번 노드, 좌표 (x,y)
+            nodes.add(new Node(i + 1, nodeinfo[i][0], nodeinfo[i][1]));
+        }
+
+        // y 내림차순, y 같으면 x 오름차순 정렬
+        nodes.sort((a, b) ->
+            (b.y != a.y) ? (b.y - a.y) : (a.x - b.x)
+        );
+
+        Node root = nodes.get(0);
+
+        // 나머지 노드들을 트리에 삽입
+        for (int i = 1; i < n; i++) {
+            insertNode(root, nodes.get(i));
+        }
+
+        // 전위·후위 순회 돌기
+        List<Integer> preorderList = new ArrayList<>();
+        List<Integer> postorderList = new ArrayList<>();
+        preorder(root, preorderList);
+        postorder(root, postorderList);
+
+        int[][] answer = new int[2][n];
+        for (int i = 0; i < n; i++) {
+            answer[0][i] = preorderList.get(i);
+            answer[1][i] = postorderList.get(i);
+        }
+
+        return answer;
+    }
+
+    // 트리에 노드 삽입 -> x 좌표 기준으로 왼쪽/오른쪽 자식 결정
+    private void insertNode(Node parent, Node child) {
+        if (child.x < parent.x) { // x 값이 작으면 왼쪽으로
+            if (parent.left == null) {
+                parent.left = child;
+            } else {
+                insertNode(parent.left, child);
+            }
+        } else { // x 값이 크면 왼쪽으로
+            if (parent.right == null) {
+                parent.right = child;
+            } else {
+                insertNode(parent.right, child);
+            }
+        }
+    }
+
+    // 전위 순회 (root → left → right)
+    private void preorder(Node node, List<Integer> list) {
+        list.add(node.num);
+        if (node.left != null) preorder(node.left,  list);
+        if (node.right != null) preorder(node.right, list);
+    }
+
+    // 후위 순회 (left → right → root)
+    private void postorder(Node node, List<Integer> list) {
+        if (node.left != null) postorder(node.left,  list);
+        if (node.right != null) postorder(node.right, list);
+        list.add(node.num);
+    }
+}

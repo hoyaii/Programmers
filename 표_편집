@@ -1,0 +1,57 @@
+import java.util.*;
+class Solution {
+    public String solution(int n, int k, String[] cmd) {
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        char[] alive = new char[n];
+        Arrays.fill(alive, 'O');
+
+        int[] prev = new int[n];
+        int[] next = new int[n];
+        for (int i = 0; i < n; i++) {
+            prev[i] = i - 1; // 맨 위는 -1
+            next[i] = (i == n - 1) ? -1 : i + 1; // 맨 아래는 -1
+        }
+
+        for (String s : cmd) {
+            char op = s.charAt(0);
+
+            // U X, D X
+            if (op == 'U' || op == 'D') {
+                int x = Integer.parseInt(s.substring(2));
+                while (x-- > 0) {
+                    k = (op == 'U') ? prev[k] : next[k];
+                }
+            }
+
+            // 현재 행 삭제 
+            if (op == 'C') {
+                stack.push(k);
+                alive[k] = 'X';
+
+                int up = prev[k];
+                int dn = next[k];
+
+                if (up != -1) next[up] = dn;
+                if (dn != -1) prev[dn] = up;
+
+                // 아래가 있으면 k는 아래로, 없으면 위로
+                k = (dn != -1) ? dn : up;
+            }
+
+            // 가장 최근 삭제 행 복구
+            if (op == 'Z') {
+                int x = stack.pop();
+                alive[x] = 'O';
+
+                int up = prev[x];
+                int dn = next[x];
+
+                if (up != -1) next[up] = x;
+                if (dn != -1) prev[dn] = x;
+            }
+        }
+
+        return new String(alive);
+    }
+}

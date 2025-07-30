@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    public int solution(int n, int[][] results) {
+        List<List<Integer>> beats = new ArrayList<>(); // i가 이긴 선수
+        List<List<Integer>> losesTo = new ArrayList<>(); // i가 진 선수
+        for (int i = 0; i <= n; i++) {        
+            beats.add(new ArrayList<>());
+            losesTo.add(new ArrayList<>());
+        }
+
+        for (int[] r : results) {
+            int winner = r[0];
+            int loser = r[1];
+            beats.get(winner).add(loser); // winner -> loser
+            losesTo.get(loser).add(winner); // loser <- winner
+        }
+
+        // 각 선수의 위·아래 관계 확인
+        int answer = 0;
+        for (int player = 1; player <= n; player++) {
+            int higher = bfs(player, losesTo, n); // 나보다 강한 선수 수
+            int lower = bfs(player, beats, n); // 나보다 약한 선수 수
+
+            // 모든 선수와 우열 관계가 정해졌다면 순위 확정
+            if (higher + lower == n - 1) answer++;
+        }
+
+        return answer;
+    }
+
+    // BFS로 start에서 도달 가능한 노드 수 카운팅
+    private int bfs(int start, List<Set<Integer>> graph, int n) {
+        boolean[] visited = new boolean[n + 1];
+        Queue<Integer> que = new ArrayDeque<>();
+
+        visited[start] = true;
+        que.offer(start);
+
+        int cnt = 0;
+        while (!que.isEmpty()) {
+            int cur = que.poll();
+            for (int next : graph.get(cur)) {
+                if (visited[next]) continue;
+
+                visited[next] = true;
+                cnt++; 
+                que.offer(next);
+            }
+        }
+        return cnt;
+    }
+}

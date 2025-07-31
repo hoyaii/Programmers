@@ -1,0 +1,56 @@
+
+import java.util.*;
+class Solution {
+    private class Member {
+        Member parent; // 추천인(부모)
+        String name;    
+        int profit; // 누적 이익
+
+        Member(String name) {
+            this.name = name;
+        }
+    }
+
+    public int[] solution(String[] enroll, String[] referral, String[] seller, int[] amount) {
+       int n = enroll.length;
+
+        // 이름 → 노드 매핑 
+        Map<String, Member> memberOf = new HashMap<>(n * 2);
+        for (String name : enroll) {
+            memberOf.put(name, new Member(name));
+        }
+
+        // 부모 연결 
+        for (int i = 0; i < n; i++) {
+            if (!referral[i].equals("-")) {
+                Member child = memberOf.get(enroll[i]);
+                Member parent = memberOf.get(referral[i]);
+                child.parent = parent;
+            }
+        }
+
+        // 판매 건별 이익 계산 
+        for (int i = 0; i < seller.length; i++) {
+            Member cur = memberOf.get(seller[i]);
+            int money = amount[i] * 100; // 개당 100원
+
+            distribute(cur, money);
+        }
+
+        int[] answer = new int[n];
+        for (int i = 0; i < n; i++) {
+            answer[i] = memberOf.get(enroll[i]).profit;
+        }
+        return answer;
+    }
+
+    // 재귀적으로 10% 커미션을 위쪽으로 전파
+    private void distribute(Member member, int money) {
+        int commission = money / 10;
+        member.profit += money - commission; // 자신 몫 적립
+
+        // 더 이상 전파할 금액 없음
+        if (commission == 0 || member.parent == null)  return;    
+        distribute(member.parent, commission); // 상위 추천인에게 전파
+    }
+}

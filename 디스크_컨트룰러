@@ -1,0 +1,69 @@
+import java.util.*;
+class Solution {
+    public int solution(int[][] jobs) {
+        int n = jobs.length;
+        int sum = 0;  
+        int time = 0;
+
+        // 요청 시각에 따라 작업이 정렬되어 있는 순서 큐 => 요청 시간이 되면 큐에서 작업을 꺼내서 대기 큐에 넣거나, 처리
+        PriorityQueue<int[]> seq = new PriorityQueue<>((a,b) -> {
+            return Integer.compare(a[1], b[1]); // 요청 시각 오름차순
+        });
+
+        // 우선 순위에 따라 작업을 관리하는 대기 큐
+        PriorityQueue<int[]> que = new PriorityQueue<>((a,b) -> {
+            // 소요 시간 같음
+            if (a[0] == b[0]) {
+                // 작업 요청 시간 같음
+                if (a[1] == b[1]) return Integer.compare(a[2], b[2]); // 작업 번호 오름차순
+                return Integer.compare(a[1], b[1]); // 요청 시각 오름차순
+            }
+            return Integer.compare(a[0], b[0]); // 소요 시간 오름차순
+        });
+
+        // [소요 시간, 요청 시각, 작업 번호]
+        for (int id = 0; id < n; id++) {
+            int request = jobs[id][0];
+            int consume = jobs[id][1];
+            seq.offer(new int[]{consume, request, id});
+        }
+
+        // 최초 시각으로 점프 -> 가장 빠른 요청 시각
+        int fastest = seq.peek()[1];
+        time = fastest;
+
+        // 최초 도착분 모두 대기열로 이동
+        while (!seq.isEmpty() && seq.peek()[1] == time) {
+            que.offer(seq.poll());
+        }
+
+        int done = 0;
+
+        while (done < n) {
+            // 대기열이 비어 있으면 다음 요청 시각으로 점프 후, 그 시각까지 도착한 작업 모두 투입
+            if (que.isEmpty()) {
+                time = seq.peek()[1]; // 다음 요청 시각
+                while (!seq.isEmpty() && seq.peek()[1] == time) {
+                    que.offer(seq.poll());
+                }
+            }
+
+            // 현재 실행할 작업 선택
+            int[] cur = que.poll(); 
+            int start = Math.max(time, cur[1]);
+            int end = start + cur[0];
+
+            // 해당 작업 완료 시각으로 바로 점프
+            time = end;
+            sum += (time - cur[1]); // turnaround 누적
+            done++;
+
+            // 작업 실행 도중 도착한 모든 작업을 대기열로 이동
+            while (!seq.isEmpty() && seq.peek()[1] <= time) {
+                que.offer(seq.poll());
+            }
+        }
+
+        return sum / n;
+    }
+}

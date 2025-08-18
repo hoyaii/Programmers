@@ -1,0 +1,51 @@
+import java.util.*;
+class Solution {
+    static Map<Integer, List<Integer>> map = new HashMap<>(); // 노드의 인접 리스트를 관리하는 맵
+    static boolean[] visited = new boolean[1000001];
+    static int[] degree = new int[1000001];
+
+    static int compSize; // 특정 트리의 노드 개수
+    static int compSame; // 특정 트리에서 홀짝 노드의 개수
+
+    public int[] solution(int[] nodes, int[][] edges) {
+        // 인접 리스트 생성
+        for (int v : nodes) map.put(v, new ArrayList<>());
+
+        // 간선 연결
+        for (int[] e : edges) {
+            int a = e[0], b = e[1];
+            map.get(a).add(b);
+            map.get(b).add(a);
+            degree[a]++; degree[b]++; // 차수 계산
+        }
+
+        int oddEvenTrees = 0; // 홀짝 트리 개수
+        int revOddEvenTrees = 0; // 역홀짝 트리 개수
+
+        for (int root : nodes) {
+            if (visited[root]) continue; // 이미 방문한 거는 패스
+
+            compSize = 0;
+            compSame = 0;
+            dfs(root);
+
+            if (compSame == 1) oddEvenTrees++; // 홀짝 노드의 개수가 한 개 -> 홀짝 트리
+            if ((compSize - compSame) == 1) revOddEvenTrees++; // 역홀짝 노드의 개수가 한 개 -> 역홀짝 트리
+        }
+
+        return new int[]{oddEvenTrees, revOddEvenTrees};
+    }
+
+    private void dfs(int v) {
+        visited[v] = true;
+        compSize++;
+
+        // 홀짝 노드인 경우
+        if((v % 2 == 0 && degree[v] % 2 == 0) || (v % 2 == 1 && degree[v] % 2 == 1)) 
+           compSame++; 
+
+        for (int nv : map.get(v)) {
+            if (!visited[nv]) dfs(nv); // 인접 노드 방문
+        }
+    }
+}

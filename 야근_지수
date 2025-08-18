@@ -1,0 +1,25 @@
+import java.util.*;
+class Solution {
+    public long solution(int n, int[] works) {
+        // 최대 힙 구성
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> Integer.compare(b, a));
+        for (int w : works) pq.offer(w);
+
+        // n이 소진되거나 최댓값이 0이 될 때까지
+        while (n > 0) {
+            int top = pq.poll();
+            if (top == 0) break; // 더 깎을 게 없음
+            pq.offer(top - 1);
+            n--;
+        }
+
+        // 제곱합 계산 
+        long answer = 0L;
+        while (!pq.isEmpty()) {
+            long v = pq.poll();
+            answer += v * v;
+        }
+
+        return answer;
+    }
+}

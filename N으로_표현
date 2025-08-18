@@ -1,0 +1,64 @@
+import java.util.*;
+class Solution {
+    public int minCountUsingN(int N, int number) {
+        int offset = 64000;
+        int limit_pos = 64000;
+        int limit_neg = -64000;
+
+        int[] dp = new int[150000];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        
+        Queue<Integer> que = new ArrayDeque<>();
+        que.offer(0);
+        dp[offset] = 0;
+        
+        while(!que.isEmpty()){
+            int val = que.poll();
+            int cnt = dp[val + offset];
+            
+            // cnt + mul이 9 이하일 때까지 N, NN, NNN..을 처리
+            int mul = 1;
+            while(cnt + mul < 9){
+                int num = concatN(N, mul);
+                
+                // 덧셈
+                if(val + num <= limit_pos && val + num > 0 && dp[val + num + offset] > cnt + mul) { 
+                    dp[val + num + offset] = cnt + mul;         
+                    que.offer(val + num);
+                }
+                
+                // 곱셈
+                if(val * num <= limit_pos && val * num > 0 && dp[val * num + offset] > cnt + mul){ 
+                    dp[val * num + offset] = cnt + mul;
+                    que.offer(val * num);
+                }
+                
+                // 나눗셈
+                if(val != 0 && dp[val / num + offset] > cnt + mul){ 
+                    dp[val / num + offset] = cnt + mul;
+                    que.offer(val / num);
+                }
+                
+                // 뺄셈
+                if(val - num >= limit_neg && dp[val - num + offset] > cnt + mul){ 
+                    dp[val - num + offset] = cnt + mul;
+                    que.offer(val - num);
+                }
+                
+                mul++;
+            }    
+        }
+        
+        return dp[number + offset] != Integer.MAX_VALUE ? dp[number + offset] : -1;
+    }
+    
+    // N을 mul번 이어붙인 수 반환
+    private int concatN(int N, int mul){        
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < mul; i++){
+            sb.append(String.valueOf(N));
+        }
+
+        return Integer.valueOf(sb.toString());
+    }
+}

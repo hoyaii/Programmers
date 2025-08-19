@@ -1,0 +1,79 @@
+import java.util.*;
+class Solution {
+    private List<List<Node>> graph = new ArrayList<>();
+    private Set<Integer> summitsSet = new HashSet<>();
+    private List<int[]> candidates = new ArrayList<>();
+
+    private class Node {
+        int idx;
+        int cost;
+
+        Node(int idx, int cost) {
+            this.idx = idx;
+            this.cost = cost;
+        }
+    }
+
+    public int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
+        // 그래프 초기화
+        graph = new ArrayList<>();
+        for (int i = 0; i <= n; i++) graph.add(new ArrayList<>());
+
+        // 간선 연결
+        for (int[] p : paths) {
+            int u = p[0], v = p[1], w = p[2];
+            graph.get(u).add(new Node(v, w));
+            graph.get(v).add(new Node(u, w));
+        }
+
+        // 봉우리 세트 -> 탐색 시 봉우리인지 판별할 때 사용
+        for (int s : summits) summitsSet.add(s);
+
+        int[] intensity = new int[n + 1];
+        Arrays.fill(intensity, -1);
+
+        bfs(gates, intensity);
+
+        // 후보 정렬 -> intensity 오름차순, 같으면 봉우리 번호 오름차순
+        candidates.sort((a, b) -> {
+            if (a[0] == b[0]) return Integer.compare(a[1], b[1]);
+            return Integer.compare(a[0], b[0]);
+        });
+
+        return new int[]{candidates.get(0)[1], candidates.get(0)[0]};
+    }
+
+    private void bfs(int[] gates, int[] intensity) {
+        Queue<Node> q = new ArrayDeque<>();
+        for (int start : gates) {
+            q.offer(new Node(start, 0));
+            intensity[start] = 0; // 시작점은 0으로
+        }
+
+        while (!q.isEmpty()) {
+            Node cur = q.poll();
+
+            for (Node nxt : graph.get(cur.idx)) {
+                // 다음 정점까지 도달 시의 intensity
+                int nextIntensity = Math.max(intensity[cur.idx], nxt.cost);
+
+                // 시작점 도달 -> 그냥 패스
+                if (intensity[nxt.idx] == 0) continue;
+
+                // 더 나은 intensity로만 진행
+                if (intensity[nxt.idx] != -1 && intensity[nxt.idx] <= nextIntensity) continue;
+
+                // 봉우리 도달 -> 후보에 추가 (봉우리 탐색은 안함)
+                if (summitsSet.contains(nxt.idx)) {
+                    intensity[nxt.idx] = nextIntensity;
+                    candidates.add(new int[]{nextIntensity, nxt.idx});
+                    continue;
+                }
+
+                // 갱신 및 확장
+                intensity[nxt.idx] = nextIntensity;
+                q.offer(nxt);
+            }
+        }
+    }
+}

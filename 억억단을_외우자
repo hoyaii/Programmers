@@ -1,0 +1,31 @@
+class Solution {
+    public int[] solution(int e, int[] starts) {
+        // 약수 개수 계산 like 에라토스테네스의 체
+        int[] cnt = new int[e + 1];
+        for (int i = 1; i <= e; i++) {
+            for (int k = i; k <= e; k += i) {
+                cnt[k]++;
+            }
+        }
+
+        // 뒤에서 앞으로 -> [i..e]에서 최대값 저장
+        int[] dp = new int[e + 1];
+        int maxCnt = -1;
+        int best = 0;
+        for (int i = e; i >= 1; i--) {
+            if (cnt[i] >= maxCnt) { // 동률이면 더 작은 수로 교체
+                maxCnt = cnt[i];
+                best = i;
+            }
+            dp[i] = best;
+        }
+
+        int n = starts.length;
+        int[] answer = new int[n];
+        for (int i = 0; i < n; i++) {
+            answer[i] = dp[starts[i]];
+        }
+
+        return answer;
+    }
+}

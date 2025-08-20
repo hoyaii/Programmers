@@ -1,0 +1,64 @@
+import java.util.*;
+class Solution {
+    public String solution(String play_time, String adv_time, String[] logs) {
+        int total_time = toSec(play_time); // 전체 플레이 시간 (초 표현)
+        int sub_time = toSec(adv_time); // 광고 시간 (초 표현)
+
+        // 시작점과 끝점을 분리해서, 우선순위 큐에 추가 (like 라인스위핑) 
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
+        for (String log : logs) {
+            String[] part = log.split("-");
+            int s = toSec(part[0]);
+            int e = toSec(part[1]);
+            pq.offer(new int[]{s, +1}); // 시작점은 +1
+            pq.offer(new int[]{e, -1}); // 끝점은 -1
+        }
+
+        // 초 단위 동시 시청자 수로 변환 -> cnt[t] = t초에 보고 있는 사람 수
+        int[] cnt = new int[total_time + 2];
+        for (int t = 0; t <= total_time; t++) {
+            // 우선순위 큐에서 시점 t와 일치하는 시작점 혹 끝점 꺼내기
+            while (!pq.isEmpty() && pq.peek()[0] == t) {
+                int[] cur = pq.poll();
+                if (cur[1] > 0) cnt[t]++; // 시청 시작
+                if (cur[1] > 0) cnt[t]--; // 시청 종료
+            }
+
+            // 프리픽스 형태로 밀어올리기
+            cnt[t + 1] += cnt[t];
+        }
+
+        // 길이 sub_time 윈도우의 합 (for 슬라이딩) 
+        long win = 0L;
+        for (int t = 0; t < sub_time; t++) win += cnt[t];
+
+        long maxSum = win;
+        int best = 0;
+
+        // 슬라이딩 윈도우로 누적 재생시간 쭉 계산
+        for (int start = 1; start <= total_time - sub_time; start++) {
+            win -= cnt[start - 1];
+            win += cnt[start + sub_time - 1];
+
+            // 누정 재생시간이 최대면 갱신
+            if (win > maxSum) {
+                maxSum = win;
+                best = start;
+            }
+        }
+
+        return toStr(best);
+    }
+
+    private int toSec(String time) {
+        String[] p = time.split(":");
+        return Integer.valueOf(p[0]) * 3600 + Integer.valueOf(p[1]) * 60 + Integer.valueOf(p[2]);
+    }
+
+    private String toStr(int sec) {
+        int h = sec / 3600;
+        int m = (sec % 3600) / 60;
+        int s = sec % 60;
+        return String.format("%02d:%02d:%02d", h, m, s);
+    }
+}

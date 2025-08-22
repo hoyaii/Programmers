@@ -1,0 +1,16 @@
+class Solution {
+    public int[] solution(int n, int s) {
+        if (s < n) return new int[] { -1 }; // 불가능 조기 반환
+
+        int base = s / n;
+        int remain = s % n;
+
+        int[] answer = new int[n];
+        for (int i = 0; i < n; i++) answer[i] = base;
+
+        // 오름차순을 유지하려면 뒤쪽부터 +1을 채움
+        for (int i = n - remain; i < n; i++) answer[i]++;
+
+        return answer;
+    }
+}

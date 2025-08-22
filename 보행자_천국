@@ -1,0 +1,32 @@
+import java.util.*;
+class Solution {    
+    private int MOD = 20170805;
+    public int solution(int m, int n, int[][] cityMap) {
+        int[][] right = new int[m][n]; // (r,c)에 "왼쪽에서" 도착한 경우의 수
+        int[][] down = new int[m][n]; // (r,c)에 "위에서" 도착한 경우의 수
+
+        // 시작점 값
+        right[0][0] = 1;
+
+        // BFS 탐색을 하지 않고, 바로 DP로 계산
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                int cell = cityMap[r][c];
+                if (cell == 1) continue; // 막혀있음
+
+                if (cell == 0) { // 모든 방향 가능
+                    int sum = right[r][c] + down[r][c];
+                    if (c + 1 < n) right[r][c+1] = (right[r][c + 1] + sum) % MOD;
+                    if (r + 1 < m) down[r+1][c] = (down[r + 1][c] + sum) % MOD;
+                }
+
+                if (cell == 2) { // 직진만 허용
+                    if (c + 1 < n) right[r][c+1] = (right[r][c+1] + right[r][c]) % MOD;
+                    if (r + 1 < m) down[r+1][c] = (down[r+1][c] + down[r][c]) % MOD;
+                }
+            }
+        }
+
+        return (right[m-1][n-1] + down[m-1][n-1]) % MOD;
+    }
+}

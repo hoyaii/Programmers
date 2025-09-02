@@ -1,0 +1,60 @@
+import java.util.*;
+class Solution {
+    public int solution(int n, int[][] lighthouse) {
+        // 각 등대의 연결 정보 저장
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            graph.add(new ArrayList<>());
+        }
+
+        // 각 등대에 연결된 뱃길의 수 => 0이 되면 처리된 노드
+        int[] degree = new int[n + 1];
+
+        for (int[] edge : lighthouse) {
+            int u = edge[0];
+            int v = edge[1];
+            graph.get(u).add(v);
+            graph.get(v).add(u);
+            degree[u]++;
+            degree[v]++;
+        }
+
+        // 차수가 1인 등대를 담을 큐
+        Queue<Integer> queue = new ArrayDeque<>();
+        for (int i = 1; i <= n; i++) {
+            if (degree[i] == 1) queue.offer(i);
+        }
+
+        int lightedCount = 0;
+        while (!queue.isEmpty()) {
+            int leaf = queue.poll();
+
+            // degree가 0이라는 것은 부모가 먼저 처리되면서 연결된 간선이 모두 사라짐
+            if (degree[leaf] == 0) continue;
+
+            // 리프 노드와 연결된, 아직 처리되지 않은 부모 노드를 찾기
+            int parent = -1;
+            for (int neighbor : graph.get(leaf)) {
+                if (degree[neighbor] > 0) {
+                    parent = neighbor;
+                    break;
+                }
+            }
+            
+            // 부모 노드의 불을 킴
+            lightedCount++;
+            degree[parent] = 0; // 처리 완료 표시
+
+            // 부모와 연결된 모든 이웃들의 차수를 1씩 감소 => 부모와 연결되었던 간선들이 사라짐
+            for (int neighbor : graph.get(parent)) {
+                if (degree[neighbor] > 0) {
+                    degree[neighbor]--;
+                    // 차수 감소 후 새로운 리프 노드가 되었다면 큐에 추
+                    if (degree[neighbor] == 1) queue.offer(neighbor);
+                }
+            }
+        }
+
+        return lightedCount;
+    }
+}

@@ -1,0 +1,72 @@
+class Solution {
+    public boolean solution(int[][] key, int[][] lock) {
+        int m = key.length;
+        int n = lock.length;
+
+        // 자물쇠를 중앙에 배치한 새로운 확장판 생성
+        int newLockSize = n + 2 * (m - 1);
+        int[][] newLock = new int[newLockSize][newLockSize];
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                newLock[m - 1 + i][m - 1 + j] = lock[i][j];
+            }
+        }
+
+        // 열쇠를 90도씩 4번 회전
+        for (int r = 0; r < 4; r++) {
+            key = rotate(key);
+            
+            // 3. 확장판의 모든 시작점에서 열쇠를 대입
+            for (int x = 0; x < n + m - 1; x++) {
+                for (int y = 0; y < n + m - 1; y++) {
+                    
+                    // 열쇠를 확장판에 더하기
+                    for (int i = 0; i < m; i++) {
+                        for (int j = 0; j < m; j++) {
+                            newLock[x + i][y + j] += key[i][j];
+                        }
+                    }
+
+                    // 자물쇠 부분이 모두 1인지 확인
+                    if (check(newLock, n, m)) {
+                        return true;
+                    }
+
+                    // 확인 후, 더했던 열쇠를 다시 빼서 원상복구
+                    for (int i = 0; i < m; i++) {
+                        for (int j = 0; j < m; j++) {
+                            newLock[x + i][y + j] -= key[i][j];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+   
+    // 자물쇠 영역이 모두 1로 채워져 열렸는지 확인
+    private boolean check(int[][] newLock, int n, int m) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (newLock[m - 1 + i][m - 1 + j] != 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // 2차원 배열을 시계 방향으로 90도 회전  
+    private int[][] rotate(int[][] key) {
+        int m = key.length;
+        int[][] rotated = new int[m][m];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < m; j++) {
+                rotated[j][m - 1 - i] = key[i][j];
+            }
+        }
+        return rotated;
+    }
+}

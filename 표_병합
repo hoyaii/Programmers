@@ -1,0 +1,147 @@
+import java.util.*;
+class Solution {
+    public String[] solution(String[] commands) {
+        List<String> result = new ArrayList<>();
+        String[][] cell = new String[51][51];
+
+        // 모든 셀을 "EMPTY"로 초기화
+        for (int r = 1; r <= 50; r++) {
+            Arrays.fill(cell[r], "EMPTY");
+        }
+
+        // 각 셀 키 -> 같은 그룹의 셀 키 집합 
+        Map<String, Set<String>> map = new HashMap<>();
+
+        for (String command : commands) {
+            String[] part = command.split(" ");
+            String order = part[0];
+
+            // UPDATE r c val
+            if (order.equals("UPDATE") && part.length == 4) {
+                int r = Integer.parseInt(part[1]);
+                int c = Integer.parseInt(part[2]);
+                String val = part[3];
+
+                cell[r][c] = val; // 업데이트
+
+                // 그룹이 없으면 자신만 포함된 그룹 생성
+                String key = makeKey(r, c);
+                Set<String> group = map.getOrDefault(key, new HashSet<>());
+                if (group.isEmpty()) group.add(key);
+                map.put(key, group);
+
+                // 그룹 전체 셀의 값을 동일하게 변경
+                for (String member : group) {
+                    int[] pos = separeKey(member);
+                    cell[pos[0]][pos[1]] = val;
+                }
+            }
+
+            // UPDATE val1 val2
+            if (order.equals("UPDATE") && part.length == 3) {
+                String val1 = part[1];
+                String val2 = part[2];
+
+                for (int r = 1; r <= 50; r++) {
+                    for (int c = 1; c <= 50; c++) {
+                        if (cell[r][c].equals(val1)) {
+                            cell[r][c] = val2;
+                        }
+                    }
+                }
+            }
+
+            // MERGE r1 c1 r2 c2
+            if (order.equals("MERGE")) {
+                int r1 = Integer.parseInt(part[1]);
+                int c1 = Integer.parseInt(part[2]);
+                int r2 = Integer.parseInt(part[3]);
+                int c2 = Integer.parseInt(part[4]);
+
+                // 같은 좌표라면 무시
+                if (r1 == r2 && c1 == c2) continue;
+
+                // 병합 후 사용할 값 결정
+                String finalVal;
+                if (!cell[r1][c1].equals("EMPTY")) finalVal = cell[r1][c1];
+                else if (!cell[r2][c2].equals("EMPTY")) finalVal = cell[r2][c2];
+                else finalVal = "EMPTY";
+
+                String key1 = makeKey(r1, c1);
+                String key2 = makeKey(r2, c2);
+                
+                // 두 셀 각각의 그룹 가져오기
+                Set<String> g1 = map.getOrDefault(key1, new HashSet<>());
+                if (g1.isEmpty()) g1.add(key1);
+                map.put(key1, g1);
+
+                Set<String> g2 = map.getOrDefault(key2, new HashSet<>());
+                if (g2.isEmpty()) g2.add(key2);
+                map.put(key2, g2);
+
+                // 두 그룹 합치기
+                Set<String> union = new HashSet<>(g1);
+                union.addAll(g2);
+
+                // 합쳐진 그룹을 모든 멤버가 공유하도록 map 갱신
+                for (String member : union) {
+                    map.put(member, union);
+                }
+                
+                // 그룹 전체 값을 최종 값으로 통일
+                for (String member : union) {
+                    int[] pos = separeKey(member);
+                    cell[pos[0]][pos[1]] = finalVal;
+                }
+            }
+
+            // UNMERGE r c
+            if (order.equals("UNMERGE")) {
+                int r = Integer.parseInt(part[1]);
+                int c = Integer.parseInt(part[2]);
+                String keep = cell[r][c];
+
+                String mainKey = makeKey(r, c);
+                Set<String> group = map.getOrDefault(mainKey, new HashSet<>());
+                Set<String> members = group.isEmpty() ? new HashSet<>(Arrays.asList(mainKey))
+                                      : new HashSet<>(group);
+
+                // 같은 그룹의 다른 셀들은 EMPTY로 초기화
+                for (String member : members) {
+                    if (!member.equals(mainKey)) {
+                        int[] pos = separeKey(member);
+                        cell[pos[0]][pos[1]] = "EMPTY";
+                    }
+                }
+
+                // 선택된 셀은 기존 값 유지
+                cell[r][c] = keep;
+
+                // 그룹 해체
+                for (String member : members) {
+                    Set<String> single = new HashSet<>();
+                    single.add(member);
+                    map.put(member, single);
+                }
+            }
+
+            // PRINT r c
+            if (order.equals("PRINT")) {
+                int r = Integer.parseInt(part[1]);
+                int c = Integer.parseInt(part[2]);
+                result.add(cell[r][c]);
+            }
+        }
+
+        return result.toArray(new String[0]);
+    }
+
+    private String makeKey(int r, int c) {
+        return r + " " + c;
+    }
+
+    private int[] separeKey(String key) {
+        String[] part = key.split(" ");
+        return new int[]{Integer.parseInt(part[0]), Integer.parseInt(part[1])};
+    }
+}

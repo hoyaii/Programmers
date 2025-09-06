@@ -1,0 +1,78 @@
+import java.util.*;
+class Solution {
+    private Map<Integer, List<int[]>> map = new HashMap<>();
+    private int min = Integer.MAX_VALUE;
+    
+    public int solution(int k, int n, int[][] reqs) { 
+        // 특정 상담 타입에 대한 요청을 정리
+        for(int[] req : reqs){
+            int a = req[0];
+            int b = req[1];
+            int c = req[2];
+            
+            List<int[]> list = map.getOrDefault(c, new ArrayList<>());
+            list.add(new int[]{a, b});
+            map.put(c, list);
+        }
+
+        int[] combi = new int[k];
+        Arrays.fill(combi, 1);
+        backtrack(0, combi, n-k);
+        
+        return min;
+    }
+    
+    // 유형에 대해 상담사를 배분하는 케이스 모두 구해보기
+    private void backtrack(int start, int[] combi, int remain){
+        if(remain == 0){ // 상담사를 모두 배분함
+            // 상담 시간 측정
+            int res = calculate(combi);
+            min = Math.min(res, min);
+            return;
+        }
+        
+        for(int i = start; i < combi.length; i++){
+            combi[i]++;
+            backtrack(i, combi, remain - 1);
+            combi[i]--;
+        }
+    }
+    
+    private int calculate(int[] consult){
+        long total = 0L; 
+
+        // 상담 타입에 따라 대기 시간 계산 
+        for(int type = 1; type <= consult.length; type++){
+            List<int[]> times = map.get(type);
+            if(times.isEmpty()) continue; // 해당 유형 요청이 없다면 건너뜀
+
+             // 이 유형을 담당하는 멘토 수
+            int afford = consult[type - 1]; 
+
+            // 진행 중 상담의 '종료시각' 최소 힙
+            PriorityQueue<Integer> end = new PriorityQueue<>();
+
+            // times는 이미 시작시각 오름차순으로 정렬되어 있음
+            for(int[] t : times){
+                int start = t[0];
+                int duration = t[1];
+
+                // start 시각 이전에 끝난 상담 종료 이벤트 처리
+                while(!end.isEmpty() && end.peek() <= start){
+                    end.poll();
+                }
+
+                // 빈 멘토가 있으므로 즉시 시작
+                if(end.size() < afford){
+                    end.offer(start + duration);
+                }else{ // 모두 바쁨 -> 가장 빨리 끝나는 멘토에게 그 종료시각부터 시작
+                    int earliest = end.poll();
+                    total += (earliest - start); // 대기시간 누적
+                    end.offer(earliest + duration); // 종료 시간은 earliest+duration
+                }
+            }
+        }
+
+        return (int) total;
+    }
+}

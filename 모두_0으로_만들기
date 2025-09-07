@@ -1,0 +1,68 @@
+import java.util.*;
+class Solution {
+    public long solution(int[] a, int[][] edges) {
+        int n = a.length;
+
+        // long 배열로 변경 (오버플로 방지)
+        long[] w = new long[n];
+        for (int i = 0; i < n; i++) {
+            w[i] = a[i];
+        }
+
+        // 그래프랑 차수 세팅
+        List<List<Integer>> g = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) g.add(new ArrayList<>());
+        int[] degree = new int[n];
+
+        for (int[] e : edges) {
+            int u = e[0], v = e[1];
+            g.get(u).add(v);
+            g.get(v).add(u);
+            degree[u]++;
+            degree[v]++;
+        }
+
+        // 리프 노드를 스택에 삽입 (시작할 노드들)  
+        Deque<Integer> st = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            if (degree[i] == 1) st.push(i);
+        }
+       
+        long answer = 0L;
+
+        // 리프에서 루트로 값 끌어올리기
+        while (!st.isEmpty()) {
+            int node = st.pop();
+
+            // 리프 노드의 부모 찾기
+            int parent = -1;
+            for (int nei : g.get(node)) {
+                if (degree[nei] > 0) { // 아직 남아있는 이웃이면 부모 (리트 노드니 부모는 하나)
+                    parent = nei;
+                    break;
+                }
+            }
+
+            // parent == -1 이면 루트 노드
+            if (parent == -1) {
+                // 루트 노드의 값이 0이여야 모두를 0으로 만들 수 있음
+                return (w[node] == 0) ? answer : -1;
+            }
+
+            // 현재 노드의 값은 0으로 만들고 부모 노드의 값 갱신
+            long val = w[node];
+            if (val != 0) {
+                w[parent] += val; 
+                w[node] = 0;
+                answer += Math.abs(val);
+            }
+
+            // 간선 제거 by 차수 
+            degree[node]--;
+            degree[parent]--;
+            if (degree[parent] == 1) st.push(parent);
+        }
+
+        return answer;
+    }
+}

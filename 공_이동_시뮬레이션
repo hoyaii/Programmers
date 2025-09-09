@@ -1,0 +1,59 @@
+import java.util.*;
+class Solution {
+    public long solution(int n, int m, int x, int y, int[][] queries) {
+        // 오버플로우 방지를 위해 long 사용
+        long s_r = x, e_r = x;
+        long s_c = y, e_c = y;
+        
+        // 쿼리를 역순으로 진행
+        for(int i = queries.length -1 ; i >= 0; i--){
+            int comm = queries[i][0];
+            int dis = queries[i][1];
+                            
+            // 왼쪽 -> 역방향은 오른쪽
+            if(comm == 0){
+                // 끝점(e_c)은 오른쪽 벽(m-1)을 넘을 수 없음
+                 e_c = Math.min(e_c + dis, m - 1);
+                
+                // 시작점(s_c)이 왼쪽 벽(0)에 붙어있지 않았다면, 함께 이동
+                if(s_c != 0){
+                    s_c += dis;
+                    if(s_c >= m) return 0; // 시작점이 끝점을 넘어서는 순간, 가능한 시작점이 없는 것이므로 종료
+                } 
+            }
+
+            //오른쪽 -> 역방향은 왼쪽
+            if(comm == 1){
+                // 시작점(s_c)은 왼쪽 벽(0)보다 작아질 수 없음
+                s_c = Math.max(s_c - dis, 0);
+                
+                // 끝점(e_c)이 오른쪽 벽(m-1)에 붙어있지 않았다면, 함께 이동
+                if(e_c != m-1){
+                    e_c -= dis;
+                    if(e_c < 0) return 0;
+                }                
+            }
+
+            // 위 -> 역방향은 아래
+            if(comm == 2){
+                e_r = Math.min(e_r + dis, n - 1);
+                if(s_r != 0){
+                    s_r += dis;
+                    if(s_r >= n) return 0;
+                } 
+            }
+
+            // 아래 -> 역방향은 위
+            if(comm == 3){
+                s_r = Math.max(s_r - dis, 0);
+                if(e_r != n - 1){
+                    e_r -= dis;
+                    if(e_r < 0) return 0;
+                } 
+            }            
+        }                  
+        
+        // 최종적으로 남은 유효 영역의 넓이
+        return (e_r - s_r + 1L) * (e_c - s_c + 1L);
+    }
+}

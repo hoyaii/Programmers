@@ -1,0 +1,64 @@
+import java.util.*;
+class Solution {
+    public int solution(String[] lines) {
+        // 모든 로그 라인을 [시작 시간, 종료 시간] 형태의 ms 단위로 변환
+        List<int[]> logIntervals = new ArrayList<>();
+        for (String line : lines) {
+            logIntervals.add(parseLine(line));
+        }
+
+        // 스위핑 알고리즘을 적용하기 위해 모든 로그를 '시작 시간' 기준으로 정렬
+        logIntervals.sort(Comparator.comparingInt(interval -> interval[0]));
+
+        // 현재 1초 윈도우에 포함된 요청들의 '종료 시간'을 오름차순으로 관리하는 우선순위 큐
+        PriorityQueue<Integer> endTimeQueue = new PriorityQueue<>();
+
+        int pos = -1; // 슬라이딩 윈도우의 끝점
+        int maxThroughput = 0; // 최대 처리량
+
+        // 시작 시간 순으로 정렬된 로그를 하나씩 순회
+        for (int[] interval : logIntervals) {
+            int startTime = interval[0];
+            int endTime = interval[1];
+
+            // 윈도우 이동 -> 윈도우의 오른쪽 지점을 로그의 시작점에 두기
+            pos = startTime;
+
+            // 현재 로그의 시작 시간을 기준으로, 1초 윈도우에서 벗어난 로그들을 큐에서 제거
+            while (!endTimeQueue.isEmpty() && endTimeQueue.peek() <= startTime - 1000) {
+                endTimeQueue.poll();
+            }
+
+            // 해당 로그의 종료 시간을 큐에 추가
+            endTimeQueue.offer(endTime);
+
+            // 최대 처리량을 갱신
+            maxThroughput = Math.max(maxThroughput, endTimeQueue.size());
+        }
+
+        return maxThroughput;
+    }
+
+    private int[] parseLine(String line) {
+        String[] parts = line.split(" ");
+        String completionTimeStr = parts[1];
+        String durationStr = parts[2];
+
+        // 응답 완료 시간을 ms로 변환 
+        String[] hms = completionTimeStr.split(":");
+        int hour = Integer.parseInt(hms[0]);
+        int minute = Integer.parseInt(hms[1]);
+        int second = Integer.parseInt(hms[2].substring(0, 2));
+        int millisecond = Integer.parseInt(hms[2].substring(3));
+        int endTime = hour * 3_600_000 + minute * 60_000 + second * 1_000 + millisecond;
+
+        // 처리 시간을 ms로 변환 
+        durationStr = durationStr.replace("s", "");
+        int duration = (int) (Double.parseDouble(durationStr) * 1000);
+
+        // 시작 시간 계산
+        int startTime = endTime - duration + 1;
+
+        return new int[]{startTime, endTime};
+    }
+}

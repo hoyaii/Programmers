@@ -1,0 +1,102 @@
+import java.util.*;
+class Solution {
+    private int min = Integer.MAX_VALUE;
+    private int n, m;
+    private boolean[][] visitedBlue, visitedRed;
+    
+    private int[] dr = {1, -1, 0, 0};
+    private int[] dc = {0, 0, 1, -1};
+    
+    public int solution(int[][] maze) {        
+        n = maze.length;
+        m = maze[0].length;
+        
+        visitedBlue = new boolean[n][m];
+        visitedRed = new boolean[n][m];
+        
+        int br = -1, bc = -1; // 파란 수레 시작 위치
+        int rr = -1, rc = -1; // 빨간 수레 시작 위치
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (maze[i][j] == 1) { // 빨간 수레 시작
+                    rr = i; rc = j;
+                } else if (maze[i][j] == 2) { // 파란 수레 시작
+                    br = i; bc = j;
+                }
+            }
+        }
+        
+        visitedBlue[br][bc] = true; // 시작점 방문 처리
+        visitedRed[rr][rc] = true;
+        
+        backtrack(0, br, bc, rr, rc, maze);
+        
+        return min == Integer.MAX_VALUE ? 0 : min;
+    }
+    
+    private void backtrack(int phase, int br, int bc, int rr, int rc, int[][] maze) {
+        if (phase >= min) return; // 이미 최소 단계 이상이면 탐색 중단
+        
+        // 두 수레가 모두 목표 도착
+        if (maze[br][bc] == 4 && maze[rr][rc] == 3) {
+            min = Math.min(min, phase);
+            return;
+        }
+        
+        // 파란 수레 이동 시도
+        for (int i = 0; i < 4; i++) {
+            int nbr = br, nbc = bc;
+            
+            // 도착 지점이 아니면 실제 이동
+            if (maze[br][bc] != 4) {
+                nbr = br + dr[i];
+                nbc = bc + dc[i];
+                if (!isValid(nbr, nbc, visitedBlue, maze)) continue;
+            }
+            
+            // 빨간 수레 이동 시도
+            for (int j = 0; j < 4; j++) {
+                int nrr = rr, nrc = rc;
+                
+                // 도착 지점이 아니면 실제 이동
+                if (maze[rr][rc] != 3) { 
+                    nrr = rr + dr[j];
+                    nrc = rc + dc[j];
+                    if (!isValid(nrr, nrc, visitedRed, maze)) continue;
+                }
+                
+                // 스와프 금지
+                if (br == nrr && bc == nrc && rr == nbr && rc == nbc) continue;
+
+                // 동일 칸 도착 금지
+                if (nbr == nrr && nbc == nrc) continue;
+                
+                // 이동 상태에 따라 방문 체크
+                if (nbr == br && nbc == bc) { // 파란 수레 고정
+                    visitedRed[nrr][nrc] = true;
+                    backtrack(phase + 1, nbr, nbc, nrr, nrc, maze);
+                    visitedRed[nrr][nrc] = false;
+                } else if (nrr == rr && nrc == rc) { // 빨간 수레 고정
+                    visitedBlue[nbr][nbc] = true;
+                    backtrack(phase + 1, nbr, nbc, nrr, nrc, maze);
+                    visitedBlue[nbr][nbc] = false;
+                } else { // 둘 다 이동
+                    visitedBlue[nbr][nbc] = true;
+                    visitedRed[nrr][nrc] = true;
+                    backtrack(phase + 1, nbr, nbc, nrr, nrc, maze);
+                    visitedBlue[nbr][nbc] = false;
+                    visitedRed[nrr][nrc] = false;
+                }
+            }
+        }
+    }
+    
+    // 범위, 벽, 방문 여부 체크
+    private boolean isValid(int r, int c, boolean[][] visited, int[][] maze) {
+        if (r < 0 || r >= n || c < 0 || c >= m) return false;
+        if (maze[r][c] == 5) return false; // 벽
+        if (visited[r][c]) return false;   // 이미 방문
+        return true;
+    }
+}

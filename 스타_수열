@@ -1,0 +1,35 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] a) {
+        int n = a.length;
+
+        // 각 숫자를 스타로 사용했을 때의 정보
+        // starInfo[num][0]은 num을 스타로 하는 페어의 개수
+        // starInfo[num][1]은 num을 스타로 사용한 마지막 이웃의 인덱스
+        int[][] starInfo = new int[a.length][2];
+        for (int i = 0; i < n; i++) starInfo[i][1] = -1; 
+
+        // a 배열을 순차적으로 쭉 처리
+        for (int i = 0; i < a.length; i++) {
+            int currentNum = a[i];
+
+            // 1st 왼쪽 이웃과 페어 시도 (그리디하게)
+            if (i > 0 && a[i-1] != currentNum && i - 1 != starInfo[currentNum][1]) {
+                starInfo[currentNum][0]++; // 현재 숫자에 대한 페어 갯수 증가
+                starInfo[currentNum][1] = i - 1; // 사용한 이웃 인덱스 저장
+            }
+            // 2nd 오른쪽 이웃과 페어 시도
+            else if (i + 1 < n && a[i+1] != currentNum && i + 1 != starInfo[currentNum][1]) {
+                starInfo[currentNum][0]++;
+                starInfo[currentNum][1] = i + 1; 
+            }
+        }
+
+        int maxPairCount = 0;
+        for (int i = 0; i < n; i++) {
+            maxPairCount = Math.max(maxPairCount, starInfo[i][0]);
+        }
+
+        return maxPairCount * 2;
+    }
+}

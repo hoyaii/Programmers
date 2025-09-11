@@ -1,0 +1,60 @@
+import java.util.*;
+class Solution {
+    private Map<String, List<String>> graph = new HashMap<>();
+    private Map<String, boolean[]> visited = new HashMap<>();
+    private List<String> resultPath = new ArrayList<>();
+    private int totalTickets = 0;
+
+    public String[] solution(String[][] tickets) {
+        this.totalTickets = tickets.length;
+
+        // 티켓을 그래프처럼 세팅
+        for (String[] ticket : tickets) {
+            String from = ticket[0];
+            String to = ticket[1];
+            graph.computeIfAbsent(from, k -> new ArrayList<>()).add(to);
+        }
+
+        // 목적지 리스트 정렬하고, visited 초기화
+        for (String key : graph.keySet()) {
+            // 알파벳 순서가 앞서는 경로를 먼저 방문하기 위해 정렬
+            Collections.sort(graph.get(key));
+
+            // 티켓 사용 여부 추적을 위해 visited 사용
+            visited.put(key, new boolean[graph.get(key).size()]);
+        }
+        
+        List<String> currentPath = new ArrayList<>();
+        currentPath.add("ICN");
+        dfs("ICN", currentPath);
+
+        return resultPath.toArray(new String[0]);
+    }
+
+    private void dfs(String currentAirport, List<String> currentPath) {
+        // 이미 경로를 찾았다면 더 이상 탐색하지 않고 즉시 종료 (가장 먼저 구한 게 알파벳 상에서 제일 앞)
+        if (!resultPath.isEmpty()) return;
+
+        // 모든 티켓을 사용해 경로가 완성된 경우
+        if (currentPath.size() == totalTickets + 1) {
+            resultPath = new ArrayList<>(currentPath); // 후보에 추가
+            return; 
+        }
+        
+        // 현재 공항에서 출발하는 항공권이 없는 경우도 있어서 getOrDefault() 사용
+        List<String> destinations = graph.getOrDefault(currentAirport, new ArrayList<>());
+        boolean[] usedTickets = visited.get(currentAirport);
+
+        for (int i = 0; i < destinations.size(); i++) {
+            if (!usedTickets[i]) {
+                usedTickets[i] = true;
+                currentPath.add(destinations.get(i));
+                
+                dfs(destinations.get(i), currentPath);
+
+                currentPath.remove(currentPath.size() - 1);
+                usedTickets[i] = false;
+            }
+        }
+    }
+}

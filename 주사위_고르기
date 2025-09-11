@@ -1,0 +1,89 @@
+import java.util.*;
+class Solution {
+    private int n;
+    private int max = -1;
+    private List<Integer> candidate = new ArrayList<>(); // 최종 우승 주사위 조합을 저장
+
+    public int[] solution(int[][] dice) {
+        n = dice.length;
+        backtrack(0, 0, new ArrayList<>(), dice);
+
+        return candidate.stream().mapToInt(i -> i + 1).sorted().toArray();
+    }
+
+    // A가 가질 주사위 조합을 생성
+    private void backtrack(int start, int depth, List<Integer> a, int[][] dice) {
+        // A가 n/2개의 주사위를 모두 선택했다면
+        if (depth == n / 2) {
+            // B가 가질 나머지 주사위들을 B 리스트에 추가
+            List<Integer> b = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                if (!a.contains(i)) b.add(i);
+            }
+
+            // 현재 조합(a, b)으로 A가 이기는 경우의 수 계산
+            int win = calculateWin(a, b, dice);
+
+            // 계산된 승수가 이전에 기록된 최대 승수보다 크다면, 우승 조합 갱신
+            if (win > max) {
+                max = win; 
+                candidate = new ArrayList<>(a); 
+            }
+
+            return;
+        }
+
+        // 주사위 조합 생성
+        for (int i = start; i < n; i++) {
+            a.add(i);
+            backtrack(i + 1, depth + 1, a, dice);
+            a.remove(Integer.valueOf(i)); 
+        }
+    }
+
+    // A와 B의 주사위 조합으로 A가 이기는 경우의 수를 계산
+    private int calculateWin(List<Integer> a, List<Integer> b, int[][] dice) {
+        // A와 B가 각각 만들 수 있는 모든 점수의 합을 저장
+        List<Integer> sumsA = new ArrayList<>();
+        List<Integer> sumsB = new ArrayList<>();
+
+        // 각 플레이어의 모든 점수 합 경우의 수를 재귀적으로 계산
+        generateSums(0, 0, a, dice, sumsA);
+        generateSums(0, 0, b, dice, sumsB);
+
+        // B의 점수 합 리스트를 이분 탐색을 위해 정렬
+        Collections.sort(sumsB);
+
+        int winCount = 0;
+        // A의 각 점수 합에 대해 이분 탐색으로 sumA보다 작은 점수가 B 리스트에 몇 개 있는지 찾음
+        for (int sumA : sumsA) {
+            int low = 0;
+            int high = sumsB.size();
+            while (low < high) {
+                int mid = low + (high - low) / 2;
+                if (sumsB.get(mid) < sumA) {
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+            }
+
+            winCount += low;
+        }
+        return winCount;
+    }
+
+    // 주어진 주사위 조합으로 만들 수 있는 모든 점수의 합을 구하기 (결정 트리 백트래킹)
+    private void generateSums(int depth, int currentSum, List<Integer> diceIndices, int[][] dice, List<Integer> allSums) {
+        // 모든 주사위를 다 굴렸으면
+        if (depth == diceIndices.size()) {
+            allSums.add(currentSum); // 최종 합을 리스트에 추가
+            return;
+        }
+
+        int dieIndex = diceIndices.get(depth);
+        for (int i = 0; i < 6; i++) { // 주사위는 6면이니 
+            generateSums(depth + 1, currentSum + dice[dieIndex][i], diceIndices, dice, allSums);
+        }
+    }
+}

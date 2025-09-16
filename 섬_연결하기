@@ -1,0 +1,44 @@
+import java.util.*;
+class Solution {
+    private int[] parent = new int[101]; // 유니온 파인드 사용을 위한 parent 배열
+
+    public int solution(int n, int[][] costs) {
+        int sum = 0;
+
+        // 부모 테이블 초기화
+        for (int i = 0; i < n; i++) parent[i] = i;
+
+        // 비용 기준으로 오름차순 정렬
+        Arrays.sort(costs, (a, b) -> Integer.compare(a[2], b[2]));
+
+        // 비용이 낮은 간선부터 쭉 연결하기
+        for (int[] cost : costs) {
+            int from = cost[0];
+            int to = cost[1];
+            int price = cost[2];
+
+            // 다리가 이미 연결되어 있다면 패스
+            if (findParent(from) == findParent(to)) continue;
+
+            // 다리를 합치고, 비용을 갱신
+            unionParent(from, to); 
+            sum += price; 
+        }
+
+        return sum;
+    }
+
+    public int findParent(int x) {
+        if (parent[x] == x) return x; // 루트 노드
+        return parent[x] = findParent(parent[x]); 
+    }
+
+    public void unionParent(int a, int b) {
+        a = findParent(a);
+        b = findParent(b);
+        
+        // 더 작은 그룹을 더 큰 그룹에 붙이기 (그냥 붙어도 되긴함)
+        if (a < b) parent[b] = a;
+        else parent[a] = b;
+    }
+}

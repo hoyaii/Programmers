@@ -1,0 +1,41 @@
+import java.util.*;
+class Solution {
+    public int solution(int[] A, int[] B) {
+        int score = 0;
+
+        // B를 정렬된 리스트로 준비
+        List<Integer> list = new ArrayList<>();
+        for (int b : B) list.add(b);
+        Collections.sort(list);
+
+        // 각 a에 대해 a보다 큰 값 중 가장 작은 값 선택 
+        for (int a : A) {
+            int idx = binarySearch(list, a); 
+
+            if (idx < list.size()) { // a보다 큰 값이 존재
+                score++;
+                list.remove(idx);
+            } else { // a보다 큰 값이 없음 (가장 작은 값 사용)
+                list.remove(0);
+            }
+        }
+        return score;
+    }
+
+    // a보다 큰 값 중 가장 작은 인덱스 찾기 (upper bound)
+    private int binarySearch(List<Integer> list, int a) {
+        int start = 0;
+        int end = list.size();
+
+        while (start < end) {
+            int mid = (start + end) / 2;
+            if (list.get(mid) <= a) {
+                start = mid + 1;
+            } else {
+                end = mid;
+            }
+        }
+
+        return start; // list.size()라면 a보다 큰 값 없음
+    }
+}

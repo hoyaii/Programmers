@@ -1,0 +1,65 @@
+import java.util.*;
+class Solution {
+    private Set<Integer> weak_pos = new HashSet<>();
+    private int min = Integer.MAX_VALUE;
+    
+    public int solution(int n, int[] weak, int[] dist) {
+        // 취약점 위치를 Set에 저장 for 빠른 조회
+        for (int w : weak) weak_pos.add(w);
+        
+        // 이동 거리가 긴 친구부터 투입하기 위해 정렬
+        Arrays.sort(dist);
+        
+        backtrack(0, 0, weak, dist, new boolean[n + 1], n);
+        
+        return min != Integer.MAX_VALUE ? min : -1;
+    }
+    
+    // 결정 트리 느낌으로, 가장 긴 친구 1 -> 그 다음 친구 -> 그 다음 친구.. 순으로 백트래킹 
+    private void backtrack(int friendIdx, int coveredCount, int[] weak, int[] distArr, boolean[] isVisited, int n) {
+        // 모든 취약점을 커버했다면, 최소값 갱신 후 종료
+        if (coveredCount == weak_pos.size()) {
+            min = Math.min(min, friendIdx);
+            return;
+        }
+
+        // 모든 친구를 투입했지만 아직 다 못 막았다면 종료
+        if (friendIdx == distArr.length) return;
+
+        // 이미 찾은 최소값보다 더 많은 친구를 사용하면 탐색 중단 (백트래킹 최적화)
+        if (friendIdx >= min)  return;
+
+        // 현재 투입할 친구의 이동 가능 거리 (내림차순으로 가장 긴 친구부터)
+        int friendDist = distArr[distArr.length - 1 - friendIdx];
+
+        // 모든 취약점을 시작점으로 시도
+        for (int i = 0; i < weak.length; i++) {
+            int startPos = weak[i];
+            
+            // 이미 다른 친구가 커버한 지점이면 건너뛰기
+            if (isVisited[startPos]) continue;
+
+            // 이번 재귀 호출에서 새로 커버한 지점들을 추적하기 위한 리스트
+            List<Integer> newlyCovered = new ArrayList<>();
+            int currentCoveredCount = coveredCount;
+
+            // 현재 친구를 startPos에 배치하여 커버 가능한 모든 지점 확인
+            for (int j = startPos; j <= startPos + friendDist; j++) {
+                int coveredPos = j % n; // 원형 탐색이니 %로 캐스팅
+
+                // 다른 영역이 커버하고 있지 않은 취약점이라면 -> 카운팅하고 visited 찍기
+                if (weak_pos.contains(coveredPos) && !isVisited[coveredPos]) {
+                    isVisited[coveredPos] = true;
+                    currentCoveredCount++;
+                    newlyCovered.add(coveredPos);
+                }
+            }
+            
+            // 다음 친구 투입
+            backtrack(friendIdx + 1, currentCoveredCount, weak, distArr, isVisited, n);
+
+            // 상태 원상 복구 
+            for (int pos : newlyCovered) isVisited[pos] = false;
+        }
+    }
+}

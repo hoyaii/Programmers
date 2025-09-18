@@ -1,0 +1,44 @@
+import java.util.*;
+class Solution {
+    public int[] solution(String[] gems) {
+        // set을 하나 만들어서 전체 보석 종류 파악
+        Set<String> set = new HashSet<>();
+        for (String gem : gems) set.add(gem);
+        int totalGemTypes = set.size();
+
+        int[] answer = new int[2];
+        int start = 0; // 투포인터의 시작 포인터
+        int minLength = Integer.MAX_VALUE;
+
+        // 슬라이딩 윈도우 내의 보석 종류와 개수를 저장할 Map
+        Map<String, Integer> gemCountMap = new HashMap<>();
+
+        // end 포인터를 오른쪽으로 쭉 이동시켜보면서, start도 가능한 선에서 최대한 이동 
+        for (int end = 0; end < gems.length; end++) {
+            String currentGem = gems[end];
+            gemCountMap.put(currentGem, gemCountMap.getOrDefault(currentGem, 0) + 1);
+
+            // start 포인터를 가능한 선에서 최대한 이동 (모든 보석이 있는 상태)
+            while (gemCountMap.size() == totalGemTypes) {
+                int currentLength = end - start + 1;
+
+                // 길이 최소값 갱신
+                if (currentLength < minLength) {
+                    minLength = currentLength;
+                    answer[0] = start + 1; 
+                    answer[1] = end + 1;
+                }
+
+                // start 포인터를 뒤로 옮기면서 윈도우 축소
+                String startGem = gems[start];
+                start++;
+                gemCountMap.put(startGem, gemCountMap.get(startGem) - 1);
+
+                // 만약 해당 보석의 개수가 0이 되면 Map에서 완전히 제거
+                if (gemCountMap.get(startGem) == 0) gemCountMap.remove(startGem);
+            }
+        }
+
+        return answer;
+    }
+}

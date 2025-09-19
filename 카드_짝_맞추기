@@ -1,0 +1,146 @@
+import java.util.*;
+class Solution {
+    private int[] dr = {-1, 1, 0, 0};
+    private int[] dc = {0, 0, -1, 1};
+
+    private List<int[]>[] pos = new ArrayList[7]; // 카드 값(1~6)별 좌표 목록을 담아둘 배열
+    private List<Integer> types = new ArrayList<>(); // 현재 보드에 실제로 존재하는 카드 타입들   
+    private int best = Integer.MAX_VALUE; // 최소 조작 횟수
+
+    public int solution(int[][] board, int r, int c) {
+        // 카드 위치 테이블 초기화
+        for (int v = 1; v <= 6; v++) pos[v] = new ArrayList<>();
+
+        // 보드를 훑으면서 카드 좌표를 pos[v]에 모으기
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                int v = board[i][j];
+                if (v > 0) pos[v].add(new int[]{i, j});
+            }
+        }
+
+        // 실제로 존재하는 카드 타입들만 types에 저장
+        for (int v = 1; v <= 6; v++) {
+            if (!pos[v].isEmpty()) types.add(v);
+        }
+
+        backtrack(board, r, c, 0, 0, new boolean[types.size()]);
+
+        return best;
+    }
+
+    private void backtrack(int[][] board, int r, int c, int removed, int cost, boolean[] used) {
+        // 현재까지 비용이 이미 best 이상이면 가지치기
+        if (cost >= best) return;
+
+        // 모든 타입을 제거했으면 최소값 갱신 후 종료
+        if (removed == types.size()) {
+            best = Math.min(best, cost);
+            return;
+        }
+
+        // 아직 제거하지 않은 카드 타입을 하나 고름
+        for (int i = 0; i < types.size(); i++) {
+            if (used[i]) continue;
+
+            used[i] = true; 
+            int v = types.get(i);           
+
+            // 현재 타입 v의 두 좌표. 항상 2개 존재.
+            int[] a = pos[v].get(0);
+            int[] b = pos[v].get(1);
+
+            int va = board[a[0]][a[1]];
+            int vb = board[b[0]][b[1]];
+
+            // 1st a → b 순서로 뒤집기
+            int d1 = dist(board, r, c, a[0], a[1]);
+            int d2 = dist(board, a[0], a[1], b[0], b[1]);
+
+            // 카드를 제거
+            board[a[0]][a[1]] = 0;
+            board[b[0]][b[1]] = 0;
+
+            backtrack(board, b[0], b[1], removed + 1, cost + d1 + d2 + 2, used); // Enter는 2번 누른다고 가정
+
+            board[a[0]][a[1]] = va; // 롤백
+            board[b[0]][b[1]] = vb;
+
+            // 2nd b → a 순서로 뒤집기
+            d1 = dist(board, r, c, b[0], b[1]);
+            d2 = dist(board, b[0], b[1], a[0], a[1]);
+
+            board[a[0]][a[1]] = 0;
+            board[b[0]][b[1]] = 0;
+
+            backtrack(board, a[0], a[1], removed + 1, cost + d1 + d2 + 2, used);
+            
+            board[a[0]][a[1]] = va; // 롤백
+            board[b[0]][b[1]] = vb;
+
+            used[i] = false;
+        }
+    }
+
+    private int dist(int[][] board, int sr, int sc, int tr, int tc) {
+        // 시작과 도착이 같으면 비용 0
+        if (sr == tr && sc == tc) return 0;
+        
+        boolean[][] vis = new boolean[4][4];
+        int[][] d = new int[4][4]; // 시작점으로부터의 비용
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+
+        q.add(new int[]{sr, sc});
+        vis[sr][sc] = true;
+
+        while (!q.isEmpty()) {
+            int[] cur = q.poll();
+            int r = cur[0], c = cur[1];
+
+            // 네 방향에 대해 "한 칸 이동"과 "Ctrl 이동" 시도
+            for (int k = 0; k < 4; k++) {
+                // 1st 한 칸 이동
+                int nr = r + dr[k], nc = c + dc[k];
+                if (0 <= nr && nr < 4 && 0 <= nc && nc < 4 && !vis[nr][nc]) {
+                    vis[nr][nc] = true;
+                    d[nr][nc] = d[r][c] + 1;
+                    
+                    if (nr == tr && nc == tc) return d[nr][nc]; 
+                    q.add(new int[]{nr, nc});
+                }
+
+                // 2nd Ctrl 이동
+                int[] jump = ctrl(board, r, c, k);
+                nr = jump[0];
+                nc = jump[1];
+                if (!vis[nr][nc]) {
+                    vis[nr][nc] = true;
+                    d[nr][nc] = d[r][c] + 1;
+                    
+                    if (nr == tr && nc == tc) return d[nr][nc]; 
+                    q.add(new int[]{nr, nc});
+                }
+            }
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
+    private int[] ctrl(int[][] board, int r, int c, int dir) {
+        int nr = r, nc = c;
+        while (true) {
+            int tr = nr + dr[dir];
+            int tc = nc + dc[dir];
+
+            // 다음 칸이 범위를 벗어나면 현재 칸이 경계 칸이므로 그 자리에서 멈춤
+            if (tr < 0 || tr >= 4 || tc < 0 || tc >= 4) return new int[]{nr, nc};
+
+            // 한 칸 전진
+            nr = tr;
+            nc = tc;
+
+            // 카드를 만나면 그 자리에서 멈춤
+            if (board[nr][nc] != 0) return new int[]{nr, nc};
+        }
+    }
+}

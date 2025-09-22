@@ -1,0 +1,108 @@
+import java.util.*;
+class Solution {
+    private int[] dr = {1, -1, 0, 0};
+    private int[] dc = {0, 0, -1, 1};
+
+    public int solution(int[][] board) {
+        int n = board.length;
+        return bfs(board, n, n);
+    }
+
+    private int bfs(int[][] board, int n, int m){
+        Queue<int[]> que = new ArrayDeque<>();
+        que.offer(new int[]{0, 0, 0, 1, 0}); // r1, c1, r2, c2, cost
+
+        Map<String, Boolean> visited = new HashMap<>();
+        String startKey = makeKey(0, 0, 0, 1);
+        visited.put(startKey, true);
+
+        while(!que.isEmpty()){
+            int[] cur = que.poll();
+            int r1 = cur[0];
+            int c1 = cur[1];
+            int r2 = cur[2];
+            int c2 = cur[3];
+            int curDis = cur[4];
+
+            // 도착점에 도달한 경우
+            if((r1 == n-1 && c1 == m-1) || (r2 == n-1 && c2 == m-1)) {
+                return curDis;
+            }
+
+            // 1st 좌표 이동
+            for(int i = 0; i < 4; i++){
+                int nr1 = r1 + dr[i];
+                int nc1 = c1 + dc[i];
+                int nr2 = r2 + dr[i];
+                int nc2 = c2 + dc[i];
+
+                if(nr1 < 0 || nr1 >= n || nc1 < 0 || nc1 >= m ||
+                   nr2 < 0 || nr2 >= n || nc2 < 0 || nc2 >= m) continue;
+
+                if(board[nr1][nc1] == 1 || board[nr2][nc2] == 1) continue;
+
+                String nextKey = makeKey(nr1, nc1, nr2, nc2);
+                if(visited.getOrDefault(nextKey, false)) continue;
+
+                que.offer(new int[]{nr1, nc1, nr2, nc2, curDis + 1});
+                visited.put(nextKey, true);
+            }
+
+            List<int[]> nextStates = new ArrayList<>();
+
+            // 2nd 회전 
+            // 가로로 놓여있을 때
+            if(isGaro(r1, r2)){
+                // 1. 위쪽으로 회전
+                if (r1 > 0 && board[r1 - 1][c1] == 0 && board[r1 - 1][c2] == 0) {
+                    nextStates.add(new int[]{r1, c1, r1 - 1, c1}); // (r1,c1)을 축으로
+                    nextStates.add(new int[]{r2, c2, r2 - 1, c2}); // (r2,c2)를 축으로
+                }
+                // 2. 아래쪽으로 회전
+                if (r1 < n - 1 && board[r1 + 1][c1] == 0 && board[r1 + 1][c2] == 0) {
+                    nextStates.add(new int[]{r1, c1, r1 + 1, c1}); // (r1,c1)을 축으로
+                    nextStates.add(new int[]{r2, c2, r2 + 1, c2}); // (r2,c2)를 축으로
+                }
+            }
+            // 세로로 놓였을 때
+            else {
+                // 1. 왼쪽으로 회전
+                if (c1 > 0 && board[r1][c1 - 1] == 0 && board[r2][c1 - 1] == 0) {
+                    nextStates.add(new int[]{r1, c1, r1, c1 - 1}); // (r1,c1)을 축으로
+                    nextStates.add(new int[]{r2, c2, r2, c2 - 1}); // (r2,c2)를 축으로
+                }
+                // 2. 오른쪽으로 회전
+                if (c1 < m - 1 && board[r1][c1 + 1] == 0 && board[r2][c1 + 1] == 0) {
+                    nextStates.add(new int[]{r1, c1, r1, c1 + 1}); // (r1,c1)을 축으로
+                    nextStates.add(new int[]{r2, c2, r2, c2 + 1}); // (r2,c2)를 축으로
+                }
+            }
+            
+            // 생성된 모든 회전 경우의 수를 큐에 추가
+            for(int[] next : nextStates){
+                String nextKey = makeKey(next[0], next[1], next[2], next[3]);
+                if(!visited.getOrDefault(nextKey, false)){
+                    visited.put(nextKey, true);
+                    que.offer(new int[]{next[0], next[1], next[2], next[3], curDis + 1});
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // 가로로 놓여있는지 판단
+    private boolean isGaro(int r1, int r2){
+        return r1 == r2;
+    }
+
+    private String makeKey(int r1, int c1, int r2, int c2){
+        if(r1 > r2 || (r1 == r2 && c1 > c2)){
+            int tempR = r1; int tempC = c1;
+            r1 = r2; c1 = c2;
+            r2 = tempR; c2 = tempC;
+        }
+
+        return r1 + "," + c1 + "," + r2 + "," + c2;
+    }
+}

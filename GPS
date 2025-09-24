@@ -1,0 +1,41 @@
+import java.util.*;
+class Solution {
+    public int solution(int n, int m, int[][] edge_list, int k, int[] gps_log) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            graph.add(new ArrayList<>());
+        }
+        
+        for (int[] edge : edge_list) {
+            graph.get(edge[0]).add(edge[1]);
+            graph.get(edge[1]).add(edge[0]);
+        }
+        
+        // 각 노드는 자기 자신에게 머무를 수 있음
+        for (int i = 1; i <= n; i++) {
+            graph.get(i).add(i);
+        }
+
+        // dp[time][node]
+        int[][] dp = new int[k][n + 1];
+        for (int i = 0; i < k; i++) {
+            Arrays.fill(dp[i], k + 1); // 나올 수 없는 큰 값으로 초기화
+        }
+
+        dp[0][gps_log[0]] = 0;
+
+        for (int t = 1; t < k; t++) { 
+            for (int curNode = 1; curNode <= n; curNode++) { // 현재 머무를 수 있는 모든 노드
+                for (int prevNode : graph.get(curNode)) {
+                    if (dp[t - 1][prevNode] <= k) { // 이전 경로가 유효하다면
+                        int cost = (curNode == gps_log[t]) ? 0 : 1;
+                        dp[t][curNode] = Math.min(dp[t][curNode], dp[t - 1][prevNode] + cost);
+                    }
+                }
+            }
+        }
+
+        int answer = dp[k - 1][gps_log[k - 1]];
+        return (answer > k) ? -1 : answer;
+    }
+}

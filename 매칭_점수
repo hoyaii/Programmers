@@ -1,0 +1,106 @@
+import java.util.*;
+class Solution {
+    public int solution(String word, String[] pages) {
+        word = word.toLowerCase();
+        
+        Map<String, Integer> index = new HashMap<>(); // URL, 페이지 인덱스
+        Map<String, Integer> score = new HashMap<>(); // URL, 기본 점수
+        Map<String, List<String>> graph = new HashMap<>(); // URL, 해당 URL을 링크한 페이지 URL 목록
+        Map<String, Integer> ref_cnt = new HashMap<>(); // URL, 외부 링크 수
+        
+        int idx = 0;
+        for(String page : pages){
+            page = page.toLowerCase(); // 소문자로 
+            String url = getUrl(page);
+            List<String> refs = getRef(page);
+            int basic = countSearchWord(page, word);
+            
+            // 기본 점수와 인덱스 저장
+            index.put(url, idx++);
+            score.put(url, basic);
+        
+            // 레퍼런스를 그래프로 연결 (key는 ref 값, 나중에 계산하기 편하게)
+            ref_cnt.put(url, refs.size());
+            for(String ref : refs){
+                List<String> adj = graph.getOrDefault(ref, new ArrayList<>());
+                adj.add(url);
+                graph.put(ref, adj);
+            }
+        }
+        
+        List<double[]> list = new ArrayList<>();
+        
+        Set<String> set = index.keySet();
+        for(String page : set){
+            int i = index.get(page);
+            
+            // 기본 점수
+            double total = score.get(pageUrl); 
+            
+            // 링그 점수 계산
+            List<String> adj = graph.getOrDefault(page, new ArrayList<>());
+            for(String a : adj){
+                int a_score = score.get(a);
+                int a_ref_cnt = ref_cnt.get(a);
+                total += (a_score * 1.0 / a_ref_cnt);
+            }
+            
+            list.add(new double[]{total, i * 1.0});
+        }
+        
+        list.sort((a, b) -> {
+            if(a[0] == b[0]) return Double.compare(a[1], b[1]);
+            return Double.compare(b[0], a[0]);
+        });
+        
+        return (int)list.get(0)[1];
+    }
+    
+    private String getUrl(String page) {
+        String searchTag = "<meta property=\"og:url\" content=\"";
+
+        int tagStart = page.indexOf(searchTag);
+
+        int urlStart = tagStart + searchTag.length();
+        int urlEnd = page.indexOf("\"", urlStart);
+
+        return page.substring(urlStart, urlEnd);
+    }
+    
+    private List<String> getRef(String page) {
+        List<String> list = new ArrayList<>();
+        int bodyStart = page.indexOf("<body>");
+        if (bodyStart == -1) return list;
+
+        int fromIndex = bodyStart;
+        while (true) {
+            int linkStart = page.indexOf("<a href=\"", fromIndex);
+            if (linkStart == -1) break;
+
+            int linkEnd = page.indexOf("\"", linkStart + 9);
+            if (linkEnd == -1) break;
+
+            list.add(page.substring(linkStart + 9, linkEnd));
+            fromIndex = linkEnd; 
+        }
+        return list;
+    }
+    
+    private int countSearchWord(String page, String target) {
+        int bodyStart = page.indexOf("<body>") + 6;
+        int bodyEnd = page.indexOf("</body>");
+        if (bodyStart < 6 || bodyEnd == -1) return 0;
+        String body = page.substring(bodyStart, bodyEnd);
+
+        String[] words = body.replaceAll("[^a-zA-Z]", " ").toLowerCase().split(" ");
+
+        int count = 0;
+        for (String w : words) {
+            if (w.equals(target)) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+}

@@ -1,0 +1,75 @@
+import java.util.*;
+class Solution {
+    private class Node {
+        Map<Character, Node> children = new HashMap<>();
+        int count = 0; // 이 노드를 통과하는 단어의 개수
+    }
+
+    private class Trie {
+        Node root = new Node();
+
+        public void insert(String word) {
+            Node node = root;
+            node.count++; // 루트 노드부터 카운트 시작
+
+            for (char ch : word.toCharArray()) {
+                node = node.children.computeIfAbsent(ch, c -> new Node());
+                node.count++; // 노드를 통과하는 단어 수 증가
+            }
+        }
+
+        public int countWordsWithPrefix(String prefix) {
+            Node node = root;
+            for (char ch : prefix.toCharArray()) {
+                if (!node.children.containsKey(ch)) return 0; // 접두사와 일치하는 단어가 없음
+                node = node.children.get(ch);
+            }
+            
+            return node.count; // 접두사의 마지막 노드에 저장된 카운트 리턴
+        }
+    }
+
+    public int[] solution(String[] words, String[] queries) {
+        // 길이에 따른 정방향/역방향 트라이
+        Map<Integer, Trie> forwardTries = new HashMap<>();
+        Map<Integer, Trie> reversedTries = new HashMap<>();
+
+        // 트라이 세팅
+        for (String word : words) {
+            int len = word.length();
+            
+            // 해당 길이에 맞는 트라이를 가져오거나 새로 생성
+            Trie forwardTrie = forwardTries.computeIfAbsent(len, k -> new Trie());
+            Trie reversedTrie = reversedTries.computeIfAbsent(len, k -> new Trie());
+
+            // 정방향과 역방향으로 트라이에 삽입
+            forwardTrie.insert(word);
+
+            String reversedWord = new StringBuilder(word).reverse().toString();
+            reversedTrie.insert(reversedWord);
+        }
+
+        int[] answer = new int[queries.length];
+
+        // 쿼리를 돌면서 매칭되는 단어 수 계산
+        for (int i = 0; i < queries.length; i++) {
+            String query = queries[i];
+            int len = query.length();
+
+            // 접미사가 '?'인 경우 
+            if (query.charAt(0) != '?') {
+                Trie trie = forwardTries.getOrDefault(len, new Trie());
+                String prefix = query.replace("?", "");
+                answer[i] = trie.countWordsWithPrefix(prefix);
+            } 
+            // 접두사가 '?'인 경우 
+            else {
+                Trie trie = reversedTries.getOrDefault(len, new Trie());
+                String suffix = query.replace("?", "");
+                String reversedSuffix = new StringBuilder(suffix).reverse().toString();
+                answer[i] = trie.countWordsWithPrefix(reversedSuffix);
+            }
+        }
+        return answer;
+    }
+}

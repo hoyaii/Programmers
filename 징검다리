@@ -1,0 +1,52 @@
+import java.util.*;
+class Solution {
+    public int solution(int distance, int[] rocks, int n) {
+        // 이분 탐색 쓰기 전에 바위 위치 정렬
+        Arrays.sort(rocks);
+
+        // '거리의 최솟값'이 될 수 있는 값 이분 탐색 (Upper-Bound 방식)
+        int lo = 1;         
+        int hi = distance + 1; 
+
+        while (lo < hi) { 
+            int mid = lo + (hi - lo) / 2;
+
+            // 'mid'를 최소 거리로 만들기 위해 제거해야 할 바위의 개수 카운팅
+            int count = countRemovedRocks(rocks, mid, distance);
+
+            // 제거한 바위가 너무 많다면, 목표 거리가 너무 큼 => 줄이기
+            if (count > n) {
+                hi = mid; 
+            } 
+            // 제거한 바위가 n개 이하라면, 목표 거리는 달성 가능 => 넓히기
+            else {
+                lo = mid + 1;
+            }
+        }
+
+        // Upper-Bound는 초과값이니 정답은 바로 전 값인 lo-1이 정답!
+        return lo - 1;
+    }
+
+    private int countRemovedRocks(int[] rocks, int targetDistance, int totalDistance) {
+        int count = 0;
+        int lastPos = 0; // 기준이 되는 이전 위치 (출발점부터 시작)
+
+        for (int currentRock : rocks) {
+            // 이전 위치와의 거리가 목표 거리보다 짧으면, 바위 제거
+            if (currentRock - lastPos < targetDistance) {
+                count++;
+            } 
+            else { // 거리가 충분하다면, 이 바위는 남겨둠 & lastPos 갱신
+                lastPos = currentRock;
+            }
+        }
+
+        // 마지막으로 남은 바위와 도착점 사이의 거리를 확인 => 거리가 목표보다 짧다면, 마지막 바위도 제거
+        if (totalDistance - lastPos < targetDistance) {
+            count++;
+        }
+
+        return count;
+    }
+}

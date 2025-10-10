@@ -1,0 +1,47 @@
+class Solution {
+    public long solution(int a, int b, int[] g, int[] s, int[] w, int[] t) {
+        int n = g.length;
+        long lo = 0;
+        long hi = 4L * 100000 * 1000000000L; // (최대 왕복시간 * 최대 광물 무게)
+
+        while (lo < hi) {
+            long mid = lo + (hi - lo) / 2;
+
+            // mid 시간 내에 배달이 가능하면, 더 짧은 시간을 탐색
+            if (canDeliver(mid, a, b, g, s, w, t, n)) {
+                hi = mid;
+            } else { // mid 시간 내에 배달이 불가능하면, 더 긴 시간이 필요
+                lo = mid + 1;
+            }
+        }
+        
+        return lo;
+    }
+
+    private boolean canDeliver(long time, int a, int b, int[] g, int[] s, int[] w, int[] t, int n) {
+        long totalGold = 0; // 운반 가능한 금의 총량
+        long totalSilver = 0; // 운반 가능한 은의 총량
+        long totalMineral = 0; // 운반 가능한 전체 광물의 총량
+
+        for (int i = 0; i < n; i++) {
+            long currentG = g[i];
+            long currentS = s[i];
+            long currentW = w[i];
+            long currentT = t[i];
+
+            // 현재 도시의 트럭이 주어진 시간 동안 몇 번 편도 운행할 수 있는지 계산
+            long moveCount = time / (2 * currentT);
+            if (time % (2 * currentT) >= currentT) {
+                moveCount++;
+            }
+            
+            // 현재 도시에서 운반할 수 있는 최대 무게
+            long cityCapacity = moveCount * currentW;
+            totalGold += Math.min(currentG, cityCapacity);
+            totalSilver += Math.min(currentS, cityCapacity);            
+            totalMineral += Math.min(currentG + currentS, cityCapacity);
+        }
+
+        return totalGold >= a && totalSilver >= b && totalMineral >= (long)a + b;
+    }
+}
